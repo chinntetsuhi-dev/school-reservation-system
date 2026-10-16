@@ -1,0 +1,735 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ScheduleChangeController.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.controller</a> &gt; <span class="el_source">ScheduleChangeController.java</span></div><h1>ScheduleChangeController.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.controller;
+
+import com.example.interviewsystem.dao.JpaUtil;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.servlet.http.HttpSession;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+@Controller
+<span class="nc" id="L23">public class ScheduleChangeController {</span>
+
+    @GetMapping(&quot;/teacher/schedule-change&quot;)
+    public String scheduleChange(
+            HttpSession session,
+            @RequestParam(
+                    value = &quot;message&quot;,
+                    required = false
+            ) String message,
+            Model model) {
+
+<span class="nc" id="L34">        Long loginUserId =</span>
+<span class="nc" id="L35">                (Long) session.getAttribute(&quot;loginUserId&quot;);</span>
+
+<span class="nc" id="L37">        String role =</span>
+<span class="nc" id="L38">                (String) session.getAttribute(&quot;loginRole&quot;);</span>
+
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (loginUserId == null</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">                || !&quot;TEACHER&quot;.equals(role)) {</span>
+
+<span class="nc" id="L43">            return &quot;redirect:/login&quot;;</span>
+        }
+
+<span class="nc" id="L46">        List&lt;String&gt; dates = findDates();</span>
+<span class="nc" id="L47">        List&lt;String&gt; times = findTimes();</span>
+<span class="nc" id="L48">        List&lt;ScheduleChangeCell&gt; cells = findCells();</span>
+
+<span class="nc" id="L50">        Map&lt;String, ScheduleChangeCell&gt; cellMap =</span>
+<span class="nc" id="L51">                new HashMap&lt;String, ScheduleChangeCell&gt;();</span>
+
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        for (ScheduleChangeCell cell : cells) {</span>
+<span class="nc" id="L54">            cellMap.put(</span>
+<span class="nc" id="L55">                    cell.getDate()</span>
+<span class="nc" id="L56">                            + &quot;_&quot;</span>
+<span class="nc" id="L57">                            + cell.getTime(),</span>
+<span class="nc" id="L58">                    cell</span>
+            );
+        }
+
+<span class="nc" id="L62">        int manualCount =</span>
+<span class="nc" id="L63">                countManualRequired();</span>
+
+<span class="nc" id="L65">        model.addAttribute(&quot;dates&quot;, dates);</span>
+<span class="nc" id="L66">        model.addAttribute(&quot;times&quot;, times);</span>
+<span class="nc" id="L67">        model.addAttribute(&quot;cellMap&quot;, cellMap);</span>
+<span class="nc" id="L68">        model.addAttribute(&quot;manualCount&quot;, manualCount);</span>
+<span class="nc" id="L69">        model.addAttribute(&quot;message&quot;, null);</span>
+
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (&quot;manualRemaining&quot;.equals(message)) {</span>
+<span class="nc" id="L72">            model.addAttribute(</span>
+<span class="nc" id="L73">                    &quot;errorMessage&quot;,</span>
+<span class="nc" id="L74">                    &quot;手動確認が必要な児童が残っています。&quot;</span>
+                            + &quot;赤色の枠を確認してください。&quot;
+            );
+        }
+
+<span class="nc" id="L79">        return &quot;teacher/schedule-change&quot;;</span>
+    }
+
+    @PostMapping(&quot;/teacher/schedule-change/save&quot;)
+    public String saveScheduleChange(
+            HttpSession session,
+            @RequestParam(
+                    value = &quot;assignments&quot;,
+                    required = false
+            ) String assignments,
+            Model model) {
+
+<span class="nc" id="L91">        Long loginUserId =</span>
+<span class="nc" id="L92">                (Long) session.getAttribute(&quot;loginUserId&quot;);</span>
+
+<span class="nc" id="L94">        String role =</span>
+<span class="nc" id="L95">                (String) session.getAttribute(&quot;loginRole&quot;);</span>
+
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if (loginUserId == null</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">                || !&quot;TEACHER&quot;.equals(role)) {</span>
+
+<span class="nc" id="L100">            return &quot;redirect:/login&quot;;</span>
+        }
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        if (assignments == null</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">                || assignments.trim().isEmpty()) {</span>
+
+<span class="nc" id="L106">            return &quot;redirect:/teacher/schedule-change&quot;;</span>
+        }
+
+<span class="nc" id="L109">        boolean success =</span>
+<span class="nc" id="L110">                updateAssignments(assignments);</span>
+
+<span class="nc" id="L112">        List&lt;String&gt; dates = findDates();</span>
+<span class="nc" id="L113">        List&lt;String&gt; times = findTimes();</span>
+<span class="nc" id="L114">        List&lt;ScheduleChangeCell&gt; cells = findCells();</span>
+
+<span class="nc" id="L116">        Map&lt;String, ScheduleChangeCell&gt; cellMap =</span>
+<span class="nc" id="L117">                new HashMap&lt;String, ScheduleChangeCell&gt;();</span>
+
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        for (ScheduleChangeCell cell : cells) {</span>
+<span class="nc" id="L120">            cellMap.put(</span>
+<span class="nc" id="L121">                    cell.getDate()</span>
+<span class="nc" id="L122">                            + &quot;_&quot;</span>
+<span class="nc" id="L123">                            + cell.getTime(),</span>
+<span class="nc" id="L124">                    cell</span>
+            );
+        }
+
+<span class="nc" id="L128">        int manualCount =</span>
+<span class="nc" id="L129">                countManualRequired();</span>
+
+<span class="nc" id="L131">        model.addAttribute(&quot;dates&quot;, dates);</span>
+<span class="nc" id="L132">        model.addAttribute(&quot;times&quot;, times);</span>
+<span class="nc" id="L133">        model.addAttribute(&quot;cellMap&quot;, cellMap);</span>
+<span class="nc" id="L134">        model.addAttribute(&quot;manualCount&quot;, manualCount);</span>
+
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        if (success) {</span>
+<span class="nc" id="L137">            model.addAttribute(</span>
+<span class="nc" id="L138">                    &quot;message&quot;,</span>
+<span class="nc" id="L139">                    &quot;日程変更を保存しました。&quot;</span>
+            );
+<span class="nc" id="L141">        } else {</span>
+<span class="nc" id="L142">            model.addAttribute(</span>
+<span class="nc" id="L143">                    &quot;errorMessage&quot;,</span>
+<span class="nc" id="L144">                    &quot;日程変更の保存に失敗しました。&quot;</span>
+            );
+        }
+
+<span class="nc" id="L148">        return &quot;teacher/schedule-change&quot;;</span>
+    }
+
+    private List&lt;String&gt; findDates() {
+<span class="nc" id="L152">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L155">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L157">            Query query =</span>
+<span class="nc" id="L158">                    em.createNativeQuery(</span>
+<span class="nc" id="L159">                            &quot;SELECT DATE_FORMAT(option_date, '%Y-%m-%d') &quot;</span>
+                                    + &quot;FROM reservation_options &quot;
+                                    + &quot;WHERE option_date BETWEEN &quot;
+                                    + &quot;'2026-07-06' AND '2026-07-10' &quot;
+                                    + &quot;GROUP BY option_date &quot;
+                                    + &quot;ORDER BY option_date ASC&quot;
+                    );
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L168">            List&lt;String&gt; rows =</span>
+<span class="nc" id="L169">                    query.getResultList();</span>
+
+<span class="nc" id="L171">            return rows;</span>
+
+        } finally {
+<span class="nc bnc" id="L174" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L175">                em.close();</span>
+            }
+        }
+    }
+
+    private List&lt;String&gt; findTimes() {
+<span class="nc" id="L181">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L184">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L186">            Query query =</span>
+<span class="nc" id="L187">                    em.createNativeQuery(</span>
+<span class="nc" id="L188">                            &quot;SELECT option_time &quot;</span>
+                                    + &quot;FROM reservation_options &quot;
+                                    + &quot;WHERE option_date BETWEEN &quot;
+                                    + &quot;'2026-07-06' AND '2026-07-10' &quot;
+                                    + &quot;GROUP BY option_time &quot;
+                                    + &quot;ORDER BY FIELD(&quot;
+                                    + &quot;option_time, &quot;
+                                    + &quot;'12:20', &quot;
+                                    + &quot;'13:00', &quot;
+                                    + &quot;'14:20', &quot;
+                                    + &quot;'15:00', &quot;
+                                    + &quot;'15:40', &quot;
+                                    + &quot;'16:20', &quot;
+                                    + &quot;'17:00', &quot;
+                                    + &quot;'17:40')&quot;
+                    );
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L206">            List&lt;String&gt; rows =</span>
+<span class="nc" id="L207">                    query.getResultList();</span>
+
+<span class="nc" id="L209">            return rows;</span>
+
+        } finally {
+<span class="nc bnc" id="L212" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L213">                em.close();</span>
+            }
+        }
+    }
+
+    private List&lt;ScheduleChangeCell&gt; findCells() {
+<span class="nc" id="L219">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L222">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L224">            Query query =</span>
+<span class="nc" id="L225">                    em.createNativeQuery(</span>
+<span class="nc" id="L226">                            &quot;SELECT &quot;</span>
+                                    + &quot;ro.id AS option_id, &quot;
+                                    + &quot;DATE_FORMAT(ro.option_date, '%Y-%m-%d') AS option_date, &quot;
+                                    + &quot;ro.option_time, &quot;
+                                    + &quot;fp.id AS plan_id, &quot;
+                                    + &quot;fp.parent_request_id, &quot;
+                                    + &quot;fp.response_status, &quot;
+                                    + &quot;pr.child_name, &quot;
+                                    + &quot;child.display_name AS child_display_name, &quot;
+                                    + &quot;child.class_name, &quot;
+                                    + &quot;parent.display_name AS parent_name, &quot;
+                                    + &quot;(&quot;
+                                    + &quot; SELECT COUNT(*) &quot;
+                                    + &quot; FROM parent_request_options pro2 &quot;
+                                    + &quot; JOIN parent_requests pr2 &quot;
+                                    + &quot; ON pro2.parent_request_id = pr2.id &quot;
+                                    + &quot; LEFT JOIN final_plans fp2 &quot;
+                                    + &quot; ON pr2.id = fp2.parent_request_id &quot;
+                                    + &quot; WHERE pro2.reservation_option_id = ro.id &quot;
+                                    + &quot; AND pro2.priority = 1 &quot;
+                                    + &quot; AND pr2.request_status = 'MANUAL_REQUIRED' &quot;
+                                    + &quot; AND fp2.id IS NULL &quot;
+                                    + &quot;) AS manual_count, &quot;
+                                    + &quot;(&quot;
+                                    + &quot; SELECT GROUP_CONCAT(&quot;
+                                    + &quot; COALESCE(st2.display_name, pr3.child_name) &quot;
+                                    + &quot; ORDER BY COALESCE(st2.display_name, pr3.child_name) &quot;
+                                    + &quot; SEPARATOR '、') &quot;
+                                    + &quot; FROM parent_request_options pro3 &quot;
+                                    + &quot; JOIN parent_requests pr3 &quot;
+                                    + &quot; ON pro3.parent_request_id = pr3.id &quot;
+                                    + &quot; LEFT JOIN final_plans fp3 &quot;
+                                    + &quot; ON pr3.id = fp3.parent_request_id &quot;
+                                    + &quot; LEFT JOIN users st2 &quot;
+                                    + &quot; ON pr3.child_user_id = st2.id &quot;
+                                    + &quot; WHERE pro3.reservation_option_id = ro.id &quot;
+                                    + &quot; AND pro3.priority = 1 &quot;
+                                    + &quot; AND pr3.request_status = 'MANUAL_REQUIRED' &quot;
+                                    + &quot; AND fp3.id IS NULL &quot;
+                                    + &quot;) AS manual_names &quot;
+                                    + &quot;FROM reservation_options ro &quot;
+                                    + &quot;LEFT JOIN final_plans fp &quot;
+                                    + &quot;ON ro.id = fp.selected_option_id &quot;
+                                    + &quot;AND fp.response_status IN &quot;
+                                    + &quot;('CONFIRMED', 'AUTO_CONFIRMED', 'SIBLING_AUTO_CONFIRMED') &quot;
+                                    + &quot;LEFT JOIN parent_requests pr &quot;
+                                    + &quot;ON fp.parent_request_id = pr.id &quot;
+                                    + &quot;LEFT JOIN users child &quot;
+                                    + &quot;ON pr.child_user_id = child.id &quot;
+                                    + &quot;LEFT JOIN users parent &quot;
+                                    + &quot;ON pr.parent_user_id = parent.id &quot;
+                                    + &quot;WHERE ro.option_date BETWEEN &quot;
+                                    + &quot;'2026-07-06' AND '2026-07-10' &quot;
+                                    + &quot;ORDER BY ro.option_date ASC, &quot;
+                                    + &quot;FIELD(ro.option_time, &quot;
+                                    + &quot;'12:20', &quot;
+                                    + &quot;'13:00', &quot;
+                                    + &quot;'14:20', &quot;
+                                    + &quot;'15:00', &quot;
+                                    + &quot;'15:40', &quot;
+                                    + &quot;'16:20', &quot;
+                                    + &quot;'17:00', &quot;
+                                    + &quot;'17:40')&quot;
+                    );
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L292">            List&lt;Object[]&gt; rows =</span>
+<span class="nc" id="L293">                    query.getResultList();</span>
+
+<span class="nc" id="L295">            List&lt;ScheduleChangeCell&gt; result =</span>
+<span class="nc" id="L296">                    new ArrayList&lt;ScheduleChangeCell&gt;();</span>
+
+<span class="nc bnc" id="L298" title="All 2 branches missed.">            for (Object[] row : rows) {</span>
+<span class="nc" id="L299">                ScheduleChangeCell cell =</span>
+<span class="nc" id="L300">                        new ScheduleChangeCell();</span>
+
+<span class="nc" id="L302">                cell.setOptionId(</span>
+<span class="nc" id="L303">                        ((Number) row[0]).longValue()</span>
+                );
+
+<span class="nc" id="L306">                cell.setDate(</span>
+<span class="nc" id="L307">                        (String) row[1]</span>
+                );
+
+<span class="nc" id="L310">                cell.setTime(</span>
+<span class="nc" id="L311">                        (String) row[2]</span>
+                );
+
+<span class="nc bnc" id="L314" title="All 2 branches missed.">                if (row[3] != null) {</span>
+<span class="nc" id="L315">                    cell.setPlanId(</span>
+<span class="nc" id="L316">                            ((Number) row[3]).longValue()</span>
+                    );
+                }
+
+<span class="nc bnc" id="L320" title="All 2 branches missed.">                if (row[4] != null) {</span>
+<span class="nc" id="L321">                    cell.setParentRequestId(</span>
+<span class="nc" id="L322">                            ((Number) row[4]).longValue()</span>
+                    );
+                }
+
+<span class="nc" id="L326">                cell.setResponseStatus(</span>
+<span class="nc" id="L327">                        (String) row[5]</span>
+                );
+
+<span class="nc" id="L330">                String childName =</span>
+<span class="nc bnc" id="L331" title="All 2 branches missed.">                        row[7] != null</span>
+<span class="nc" id="L332">                                ? (String) row[7]</span>
+<span class="nc" id="L333">                                : (String) row[6];</span>
+
+<span class="nc" id="L335">                cell.setChildName(childName);</span>
+<span class="nc" id="L336">                cell.setClassName((String) row[8]);</span>
+<span class="nc" id="L337">                cell.setParentName((String) row[9]);</span>
+
+<span class="nc" id="L339">                int manualCount = 0;</span>
+
+<span class="nc bnc" id="L341" title="All 2 branches missed.">                if (row[10] != null) {</span>
+<span class="nc" id="L342">                    manualCount =</span>
+<span class="nc" id="L343">                            ((Number) row[10]).intValue();</span>
+                }
+
+<span class="nc" id="L346">                cell.setManualCount(manualCount);</span>
+<span class="nc" id="L347">                cell.setManualNames((String) row[11]);</span>
+
+<span class="nc" id="L349">                result.add(cell);</span>
+            }
+
+<span class="nc" id="L352">            return result;</span>
+
+        } finally {
+<span class="nc bnc" id="L355" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L356">                em.close();</span>
+            }
+        }
+    }
+
+    private int countManualRequired() {
+<span class="nc" id="L362">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L365">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L367">            Query query =</span>
+<span class="nc" id="L368">                    em.createNativeQuery(</span>
+<span class="nc" id="L369">                            &quot;SELECT COUNT(*) &quot;</span>
+                                    + &quot;FROM parent_requests pr &quot;
+                                    + &quot;LEFT JOIN final_plans fp &quot;
+                                    + &quot;ON pr.id = fp.parent_request_id &quot;
+                                    + &quot;WHERE pr.request_status = 'MANUAL_REQUIRED' &quot;
+                                    + &quot;AND fp.id IS NULL&quot;
+                    );
+
+<span class="nc" id="L377">            Number count =</span>
+<span class="nc" id="L378">                    (Number) query.getSingleResult();</span>
+
+<span class="nc" id="L380">            return count.intValue();</span>
+
+        } finally {
+<span class="nc bnc" id="L383" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L384">                em.close();</span>
+            }
+        }
+    }
+
+    private boolean updateAssignments(String assignments) {
+<span class="nc" id="L390">        Map&lt;Long, Long&gt; planToNewOption =</span>
+<span class="nc" id="L391">                parseAssignments(assignments);</span>
+
+<span class="nc bnc" id="L393" title="All 2 branches missed.">        if (planToNewOption.isEmpty()) {</span>
+<span class="nc" id="L394">            return false;</span>
+        }
+
+<span class="nc" id="L397">        Set&lt;Long&gt; uniqueOptionIds =</span>
+<span class="nc" id="L398">                new HashSet&lt;Long&gt;(</span>
+<span class="nc" id="L399">                        planToNewOption.values()</span>
+                );
+
+<span class="nc bnc" id="L402" title="All 2 branches missed.">        if (uniqueOptionIds.size()</span>
+<span class="nc" id="L403">                != planToNewOption.values().size()) {</span>
+
+<span class="nc" id="L405">            return false;</span>
+        }
+
+<span class="nc" id="L408">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L411">            em = JpaUtil.createEntityManager();</span>
+<span class="nc" id="L412">            em.getTransaction().begin();</span>
+
+<span class="nc" id="L414">            Map&lt;Long, Long&gt; oldOptionMap =</span>
+<span class="nc" id="L415">                    findCurrentOptionMap(</span>
+<span class="nc" id="L416">                            em,</span>
+<span class="nc" id="L417">                            planToNewOption.keySet()</span>
+                    );
+
+<span class="nc bnc" id="L420" title="All 2 branches missed.">            for (Map.Entry&lt;Long, Long&gt; entry :</span>
+<span class="nc" id="L421">                    planToNewOption.entrySet()) {</span>
+
+<span class="nc" id="L423">                Long planId = entry.getKey();</span>
+<span class="nc" id="L424">                Long newOptionId = entry.getValue();</span>
+
+<span class="nc bnc" id="L426" title="All 2 branches missed.">                if (!oldOptionMap.containsKey(planId)) {</span>
+<span class="nc" id="L427">                    em.getTransaction().rollback();</span>
+<span class="nc" id="L428">                    return false;</span>
+                }
+
+<span class="nc" id="L431">                Query updatePlanQuery =</span>
+<span class="nc" id="L432">                        em.createNativeQuery(</span>
+<span class="nc" id="L433">                                &quot;UPDATE final_plans &quot;</span>
+                                        + &quot;SET selected_option_id = :optionId, &quot;
+                                        + &quot;response_status = 'CONFIRMED' &quot;
+                                        + &quot;WHERE id = :planId&quot;
+                        );
+
+<span class="nc" id="L439">                updatePlanQuery.setParameter(</span>
+<span class="nc" id="L440">                        &quot;optionId&quot;,</span>
+<span class="nc" id="L441">                        newOptionId</span>
+                );
+
+<span class="nc" id="L444">                updatePlanQuery.setParameter(</span>
+<span class="nc" id="L445">                        &quot;planId&quot;,</span>
+<span class="nc" id="L446">                        planId</span>
+                );
+
+<span class="nc" id="L449">                updatePlanQuery.executeUpdate();</span>
+
+<span class="nc" id="L451">                Query updateRequestQuery =</span>
+<span class="nc" id="L452">                        em.createNativeQuery(</span>
+<span class="nc" id="L453">                                &quot;UPDATE parent_requests pr &quot;</span>
+                                        + &quot;INNER JOIN final_plans fp &quot;
+                                        + &quot;ON pr.id = fp.parent_request_id &quot;
+                                        + &quot;SET pr.request_status = 'CONFIRMED' &quot;
+                                        + &quot;WHERE fp.id = :planId&quot;
+                        );
+
+<span class="nc" id="L460">                updateRequestQuery.setParameter(</span>
+<span class="nc" id="L461">                        &quot;planId&quot;,</span>
+<span class="nc" id="L462">                        planId</span>
+                );
+
+<span class="nc" id="L465">                updateRequestQuery.executeUpdate();</span>
+            }
+
+<span class="nc" id="L468">            Set&lt;Long&gt; oldOptionIds =</span>
+<span class="nc" id="L469">                    new HashSet&lt;Long&gt;(</span>
+<span class="nc" id="L470">                            oldOptionMap.values()</span>
+                    );
+
+<span class="nc" id="L473">            Set&lt;Long&gt; newOptionIds =</span>
+<span class="nc" id="L474">                    new HashSet&lt;Long&gt;(</span>
+<span class="nc" id="L475">                            planToNewOption.values()</span>
+                    );
+
+<span class="nc bnc" id="L478" title="All 2 branches missed.">            for (Long oldOptionId : oldOptionIds) {</span>
+<span class="nc bnc" id="L479" title="All 2 branches missed.">                if (!newOptionIds.contains(oldOptionId)) {</span>
+<span class="nc" id="L480">                    updateOptionAvailable(</span>
+<span class="nc" id="L481">                            em,</span>
+<span class="nc" id="L482">                            oldOptionId,</span>
+<span class="nc" id="L483">                            true</span>
+                    );
+                }
+            }
+
+<span class="nc bnc" id="L488" title="All 2 branches missed.">            for (Long newOptionId : newOptionIds) {</span>
+<span class="nc" id="L489">                updateOptionAvailable(</span>
+<span class="nc" id="L490">                        em,</span>
+<span class="nc" id="L491">                        newOptionId,</span>
+<span class="nc" id="L492">                        false</span>
+                );
+            }
+
+<span class="nc" id="L496">            em.getTransaction().commit();</span>
+
+<span class="nc" id="L498">            return true;</span>
+
+<span class="nc" id="L500">        } catch (RuntimeException e) {</span>
+<span class="nc bnc" id="L501" title="All 2 branches missed.">            if (em != null</span>
+<span class="nc bnc" id="L502" title="All 2 branches missed.">                    &amp;&amp; em.getTransaction().isActive()) {</span>
+
+<span class="nc" id="L504">                em.getTransaction().rollback();</span>
+            }
+
+<span class="nc" id="L507">            throw e;</span>
+
+        } finally {
+<span class="nc bnc" id="L510" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L511">                em.close();</span>
+            }
+        }
+    }
+
+    private Map&lt;Long, Long&gt; parseAssignments(String assignments) {
+<span class="nc" id="L517">        Map&lt;Long, Long&gt; result =</span>
+<span class="nc" id="L518">                new HashMap&lt;Long, Long&gt;();</span>
+
+<span class="nc" id="L520">        String[] pairs =</span>
+<span class="nc" id="L521">                assignments.split(&quot;,&quot;);</span>
+
+<span class="nc bnc" id="L523" title="All 2 branches missed.">        for (String pair : pairs) {</span>
+<span class="nc bnc" id="L524" title="All 2 branches missed.">            if (pair == null</span>
+<span class="nc bnc" id="L525" title="All 2 branches missed.">                    || pair.trim().isEmpty()) {</span>
+
+<span class="nc" id="L527">                continue;</span>
+            }
+
+<span class="nc" id="L530">            String[] values =</span>
+<span class="nc" id="L531">                    pair.split(&quot;:&quot;);</span>
+
+<span class="nc bnc" id="L533" title="All 2 branches missed.">            if (values.length != 2) {</span>
+<span class="nc" id="L534">                continue;</span>
+            }
+
+            try {
+<span class="nc" id="L538">                Long planId =</span>
+<span class="nc" id="L539">                        Long.valueOf(values[0].trim());</span>
+
+<span class="nc" id="L541">                Long optionId =</span>
+<span class="nc" id="L542">                        Long.valueOf(values[1].trim());</span>
+
+<span class="nc" id="L544">                result.put(planId, optionId);</span>
+
+<span class="nc" id="L546">            } catch (NumberFormatException e) {</span>
+<span class="nc" id="L547">                return new HashMap&lt;Long, Long&gt;();</span>
+            }
+        }
+
+<span class="nc" id="L551">        return result;</span>
+    }
+
+    private Map&lt;Long, Long&gt; findCurrentOptionMap(
+            EntityManager em,
+            Set&lt;Long&gt; planIds) {
+
+<span class="nc" id="L558">        Map&lt;Long, Long&gt; result =</span>
+<span class="nc" id="L559">                new HashMap&lt;Long, Long&gt;();</span>
+
+<span class="nc bnc" id="L561" title="All 4 branches missed.">        if (planIds == null || planIds.isEmpty()) {</span>
+<span class="nc" id="L562">            return result;</span>
+        }
+
+<span class="nc" id="L565">        Query query =</span>
+<span class="nc" id="L566">                em.createNativeQuery(</span>
+<span class="nc" id="L567">                        &quot;SELECT id, selected_option_id &quot;</span>
+                                + &quot;FROM final_plans &quot;
+                                + &quot;WHERE id IN (:ids)&quot;
+                );
+
+<span class="nc" id="L572">        query.setParameter(&quot;ids&quot;, planIds);</span>
+
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L575">        List&lt;Object[]&gt; rows =</span>
+<span class="nc" id="L576">                query.getResultList();</span>
+
+<span class="nc bnc" id="L578" title="All 2 branches missed.">        for (Object[] row : rows) {</span>
+<span class="nc" id="L579">            result.put(</span>
+<span class="nc" id="L580">                    ((Number) row[0]).longValue(),</span>
+<span class="nc" id="L581">                    ((Number) row[1]).longValue()</span>
+            );
+        }
+
+<span class="nc" id="L585">        return result;</span>
+    }
+
+    private void updateOptionAvailable(
+            EntityManager em,
+            Long optionId,
+            boolean available) {
+
+<span class="nc" id="L593">        Query query =</span>
+<span class="nc" id="L594">                em.createNativeQuery(</span>
+<span class="nc" id="L595">                        &quot;UPDATE reservation_options &quot;</span>
+                                + &quot;SET available_flag = :available &quot;
+                                + &quot;WHERE id = :id&quot;
+                );
+
+<span class="nc" id="L600">        query.setParameter(</span>
+<span class="nc" id="L601">                &quot;available&quot;,</span>
+<span class="nc bnc" id="L602" title="All 2 branches missed.">                available ? 1 : 0</span>
+        );
+
+<span class="nc" id="L605">        query.setParameter(</span>
+<span class="nc" id="L606">                &quot;id&quot;,</span>
+<span class="nc" id="L607">                optionId</span>
+        );
+
+<span class="nc" id="L610">        query.executeUpdate();</span>
+<span class="nc" id="L611">    }</span>
+
+<span class="nc" id="L613">    public static class ScheduleChangeCell {</span>
+
+        private Long optionId;
+        private String date;
+        private String time;
+
+        private Long planId;
+        private Long parentRequestId;
+        private String responseStatus;
+
+        private String childName;
+        private String className;
+        private String parentName;
+
+        private int manualCount;
+        private String manualNames;
+
+        public Long getOptionId() {
+<span class="nc" id="L631">            return optionId;</span>
+        }
+
+        public void setOptionId(Long optionId) {
+<span class="nc" id="L635">            this.optionId = optionId;</span>
+<span class="nc" id="L636">        }</span>
+
+        public String getDate() {
+<span class="nc" id="L639">            return date;</span>
+        }
+
+        public void setDate(String date) {
+<span class="nc" id="L643">            this.date = date;</span>
+<span class="nc" id="L644">        }</span>
+
+        public String getTime() {
+<span class="nc" id="L647">            return time;</span>
+        }
+
+        public void setTime(String time) {
+<span class="nc" id="L651">            this.time = time;</span>
+<span class="nc" id="L652">        }</span>
+
+        public Long getPlanId() {
+<span class="nc" id="L655">            return planId;</span>
+        }
+
+        public void setPlanId(Long planId) {
+<span class="nc" id="L659">            this.planId = planId;</span>
+<span class="nc" id="L660">        }</span>
+
+        public Long getParentRequestId() {
+<span class="nc" id="L663">            return parentRequestId;</span>
+        }
+
+        public void setParentRequestId(Long parentRequestId) {
+<span class="nc" id="L667">            this.parentRequestId = parentRequestId;</span>
+<span class="nc" id="L668">        }</span>
+
+        public String getResponseStatus() {
+<span class="nc" id="L671">            return responseStatus;</span>
+        }
+
+        public void setResponseStatus(String responseStatus) {
+<span class="nc" id="L675">            this.responseStatus = responseStatus;</span>
+<span class="nc" id="L676">        }</span>
+
+        public String getChildName() {
+<span class="nc" id="L679">            return childName;</span>
+        }
+
+        public void setChildName(String childName) {
+<span class="nc" id="L683">            this.childName = childName;</span>
+<span class="nc" id="L684">        }</span>
+
+        public String getClassName() {
+<span class="nc" id="L687">            return className;</span>
+        }
+
+        public void setClassName(String className) {
+<span class="nc" id="L691">            this.className = className;</span>
+<span class="nc" id="L692">        }</span>
+
+        public String getParentName() {
+<span class="nc" id="L695">            return parentName;</span>
+        }
+
+        public void setParentName(String parentName) {
+<span class="nc" id="L699">            this.parentName = parentName;</span>
+<span class="nc" id="L700">        }</span>
+
+        public int getManualCount() {
+<span class="nc" id="L703">            return manualCount;</span>
+        }
+
+        public void setManualCount(int manualCount) {
+<span class="nc" id="L707">            this.manualCount = manualCount;</span>
+<span class="nc" id="L708">        }</span>
+
+        public String getManualNames() {
+<span class="nc" id="L711">            return manualNames;</span>
+        }
+
+        public void setManualNames(String manualNames) {
+<span class="nc" id="L715">            this.manualNames = manualNames;</span>
+<span class="nc" id="L716">        }</span>
+
+        public boolean isOccupied() {
+<span class="nc bnc" id="L719" title="All 2 branches missed.">            return planId != null;</span>
+        }
+
+        public boolean getOccupied() {
+<span class="nc bnc" id="L723" title="All 2 branches missed.">            return planId != null;</span>
+        }
+
+        public boolean isManualRequired() {
+<span class="nc bnc" id="L727" title="All 2 branches missed.">            return manualCount &gt; 0;</span>
+        }
+
+        public boolean getManualRequired() {
+<span class="nc bnc" id="L731" title="All 2 branches missed.">            return manualCount &gt; 0;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

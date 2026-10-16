@@ -1,0 +1,1062 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ParentRequestDao.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.dao</a> &gt; <span class="el_source">ParentRequestDao.java</span></div><h1>ParentRequestDao.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.dao;
+
+import com.example.interviewsystem.model.ParentRequest;
+import com.example.interviewsystem.model.ReservationOption;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+<span class="nc" id="L14">public class ParentRequestDao {</span>
+
+    public void insert(
+            Long parentUserId,
+            Long childUserId,
+            String childName,
+            Long firstOptionId,
+            Long secondOptionId,
+            Long thirdOptionId,
+            String comment) {
+
+<span class="nc" id="L25">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L28">            em = JpaUtil.createEntityManager();</span>
+<span class="nc" id="L29">            em.getTransaction().begin();</span>
+
+<span class="nc" id="L31">            Query requestQuery =</span>
+<span class="nc" id="L32">                    em.createNativeQuery(</span>
+<span class="nc" id="L33">                            &quot;INSERT INTO parent_requests &quot;</span>
+                                    + &quot;(parent_user_id, &quot;
+                                    + &quot;child_user_id, &quot;
+                                    + &quot;child_name, &quot;
+                                    + &quot;comment, &quot;
+                                    + &quot;request_status) &quot;
+                                    + &quot;VALUES &quot;
+                                    + &quot;(:parentUserId, &quot;
+                                    + &quot;:childUserId, &quot;
+                                    + &quot;:childName, &quot;
+                                    + &quot;:comment, &quot;
+                                    + &quot;'SUBMITTED')&quot;
+                    );
+
+<span class="nc" id="L47">            requestQuery.setParameter(</span>
+<span class="nc" id="L48">                    &quot;parentUserId&quot;,</span>
+<span class="nc" id="L49">                    parentUserId</span>
+            );
+
+<span class="nc" id="L52">            requestQuery.setParameter(</span>
+<span class="nc" id="L53">                    &quot;childUserId&quot;,</span>
+<span class="nc" id="L54">                    childUserId</span>
+            );
+
+<span class="nc" id="L57">            requestQuery.setParameter(</span>
+<span class="nc" id="L58">                    &quot;childName&quot;,</span>
+<span class="nc" id="L59">                    childName</span>
+            );
+
+<span class="nc" id="L62">            requestQuery.setParameter(</span>
+<span class="nc" id="L63">                    &quot;comment&quot;,</span>
+<span class="nc" id="L64">                    comment</span>
+            );
+
+<span class="nc" id="L67">            requestQuery.executeUpdate();</span>
+
+<span class="nc" id="L69">            Query idQuery =</span>
+<span class="nc" id="L70">                    em.createNativeQuery(</span>
+<span class="nc" id="L71">                            &quot;SELECT LAST_INSERT_ID()&quot;</span>
+                    );
+
+<span class="nc" id="L74">            Long requestId =</span>
+<span class="nc" id="L75">                    ((Number) idQuery</span>
+<span class="nc" id="L76">                            .getSingleResult())</span>
+<span class="nc" id="L77">                            .longValue();</span>
+
+<span class="nc" id="L79">            insertRequestOption(</span>
+<span class="nc" id="L80">                    em,</span>
+<span class="nc" id="L81">                    requestId,</span>
+<span class="nc" id="L82">                    firstOptionId,</span>
+<span class="nc" id="L83">                    1</span>
+            );
+
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            if (secondOptionId != null) {</span>
+<span class="nc" id="L87">                insertRequestOption(</span>
+<span class="nc" id="L88">                        em,</span>
+<span class="nc" id="L89">                        requestId,</span>
+<span class="nc" id="L90">                        secondOptionId,</span>
+<span class="nc" id="L91">                        2</span>
+                );
+            }
+
+<span class="nc bnc" id="L95" title="All 2 branches missed.">            if (thirdOptionId != null) {</span>
+<span class="nc" id="L96">                insertRequestOption(</span>
+<span class="nc" id="L97">                        em,</span>
+<span class="nc" id="L98">                        requestId,</span>
+<span class="nc" id="L99">                        thirdOptionId,</span>
+<span class="nc" id="L100">                        3</span>
+                );
+            }
+
+<span class="nc" id="L104">            em.getTransaction().commit();</span>
+
+<span class="nc" id="L106">        } catch (RuntimeException e) {</span>
+
+<span class="nc bnc" id="L108" title="All 2 branches missed.">            if (em != null</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">                    &amp;&amp; em.getTransaction().isActive()) {</span>
+
+<span class="nc" id="L111">                em.getTransaction().rollback();</span>
+            }
+
+<span class="nc" id="L114">            throw e;</span>
+
+        } finally {
+
+<span class="nc bnc" id="L118" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L119">                em.close();</span>
+            }
+        }
+<span class="nc" id="L122">    }</span>
+
+    private void insertRequestOption(
+            EntityManager em,
+            Long requestId,
+            Long optionId,
+            int priority) {
+
+<span class="nc" id="L130">        Query query =</span>
+<span class="nc" id="L131">                em.createNativeQuery(</span>
+<span class="nc" id="L132">                        &quot;INSERT INTO parent_request_options &quot;</span>
+                                + &quot;(parent_request_id, &quot;
+                                + &quot;reservation_option_id, &quot;
+                                + &quot;priority) &quot;
+                                + &quot;VALUES &quot;
+                                + &quot;(:requestId, &quot;
+                                + &quot;:optionId, &quot;
+                                + &quot;:priority)&quot;
+                );
+
+<span class="nc" id="L142">        query.setParameter(</span>
+<span class="nc" id="L143">                &quot;requestId&quot;,</span>
+<span class="nc" id="L144">                requestId</span>
+        );
+
+<span class="nc" id="L147">        query.setParameter(</span>
+<span class="nc" id="L148">                &quot;optionId&quot;,</span>
+<span class="nc" id="L149">                optionId</span>
+        );
+
+<span class="nc" id="L152">        query.setParameter(</span>
+<span class="nc" id="L153">                &quot;priority&quot;,</span>
+<span class="nc" id="L154">                priority</span>
+        );
+
+<span class="nc" id="L157">        query.executeUpdate();</span>
+<span class="nc" id="L158">    }</span>
+
+    public boolean existsUnfinishedRequestByChildUserId(
+            Long childUserId) {
+
+<span class="nc" id="L163">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L166">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L168">            Query query =</span>
+<span class="nc" id="L169">                    em.createNativeQuery(</span>
+<span class="nc" id="L170">                            &quot;SELECT COUNT(*) &quot;</span>
+                                    + &quot;FROM parent_requests &quot;
+                                    + &quot;WHERE child_user_id &quot;
+                                    + &quot;= :childUserId &quot;
+                                    + &quot;AND request_status IN &quot;
+                                    + &quot;('SUBMITTED', &quot;
+                                    + &quot;'MANUAL_REQUIRED', &quot;
+                                    + &quot;'PARENT_CONFIRMING', &quot;
+                                    + &quot;'WAITING_PARENT', &quot;
+                                    + &quot;'RESUBMITTED')&quot;
+                    );
+
+<span class="nc" id="L182">            query.setParameter(</span>
+<span class="nc" id="L183">                    &quot;childUserId&quot;,</span>
+<span class="nc" id="L184">                    childUserId</span>
+            );
+
+<span class="nc" id="L187">            Number count =</span>
+<span class="nc" id="L188">                    (Number) query.getSingleResult();</span>
+
+<span class="nc bnc" id="L190" title="All 2 branches missed.">            return count.longValue() &gt; 0;</span>
+
+        } finally {
+
+<span class="nc bnc" id="L194" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L195">                em.close();</span>
+            }
+        }
+    }
+
+    public List&lt;ParentRequest&gt; findAll() {
+
+<span class="nc" id="L202">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L205">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L207">            Query query =</span>
+<span class="nc" id="L208">                    em.createNativeQuery(</span>
+<span class="nc" id="L209">                            &quot;SELECT pr.id, &quot;</span>
+                                    + &quot;pr.parent_user_id, &quot;
+                                    + &quot;u.display_name, &quot;
+                                    + &quot;pr.child_user_id, &quot;
+                                    + &quot;pr.child_name, &quot;
+                                    + &quot;pr.comment, &quot;
+                                    + &quot;pr.request_status, &quot;
+                                    + &quot;DATE_FORMAT(&quot;
+                                    + &quot;pr.created_at, &quot;
+                                    + &quot;'%Y-%m-%d %H:%i:%s'), &quot;
+                                    + &quot;pc.has_sibling_flag, &quot;
+                                    + &quot;pc.sibling_group &quot;
+                                    + &quot;FROM parent_requests pr &quot;
+                                    + &quot;JOIN users u &quot;
+                                    + &quot;ON pr.parent_user_id = u.id &quot;
+                                    + &quot;LEFT JOIN parent_children pc &quot;
+                                    + &quot;ON pr.parent_user_id &quot;
+                                    + &quot;= pc.parent_user_id &quot;
+                                    + &quot;AND pr.child_user_id &quot;
+                                    + &quot;= pc.child_user_id &quot;
+                                    + &quot;ORDER BY &quot;
+                                    + &quot;pr.parent_user_id ASC, &quot;
+                                    + &quot;pr.created_at ASC&quot;
+                    );
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L235">            List&lt;Object[]&gt; rows =</span>
+<span class="nc" id="L236">                    query.getResultList();</span>
+
+<span class="nc" id="L238">            List&lt;ParentRequest&gt; requests =</span>
+<span class="nc" id="L239">                    convertRows(rows);</span>
+
+<span class="nc" id="L241">            attachOptions(requests);</span>
+<span class="nc" id="L242">            applyRecommendedOptions(requests);</span>
+
+<span class="nc" id="L244">            return requests;</span>
+
+        } finally {
+
+<span class="nc bnc" id="L248" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L249">                em.close();</span>
+            }
+        }
+    }
+
+    /*
+     * 所有学生的提交状态。
+     * 即使还没有提交，也会显示在教师端列表中。
+     */
+    public List&lt;ParentRequest&gt; findSubmissionRows() {
+
+<span class="nc" id="L260">    EntityManager em = null;</span>
+
+    try {
+<span class="nc" id="L263">        em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L265">        Query query =</span>
+<span class="nc" id="L266">                em.createNativeQuery(</span>
+<span class="nc" id="L267">                        &quot;SELECT &quot;</span>
+                                + &quot;pr.id AS request_id, &quot;
+                                + &quot;pc.parent_user_id AS parent_user_id, &quot;
+                                + &quot;p.display_name AS parent_name, &quot;
+                                + &quot;c.id AS child_user_id, &quot;
+                                + &quot;c.display_name AS child_name, &quot;
+                                + &quot;pr.comment AS request_comment, &quot;
+                                + &quot;pr.request_status AS request_status, &quot;
+                                + &quot;DATE_FORMAT(&quot;
+                                + &quot;pr.created_at, &quot;
+                                + &quot;'%Y-%m-%d %H:%i'&quot;
+                                + &quot;) AS created_at_text, &quot;
+                                + &quot;pc.has_sibling_flag &quot;
+                                + &quot;AS has_sibling_flag, &quot;
+                                + &quot;pc.sibling_group &quot;
+                                + &quot;AS sibling_group &quot;
+                                + &quot;FROM users c &quot;
+                                + &quot;LEFT JOIN parent_children pc &quot;
+                                + &quot;ON c.id = pc.child_user_id &quot;
+                                + &quot;LEFT JOIN users p &quot;
+                                + &quot;ON pc.parent_user_id = p.id &quot;
+                                + &quot;LEFT JOIN parent_requests pr &quot;
+                                + &quot;ON pr.id = (&quot;
+                                + &quot;SELECT MAX(pr2.id) &quot;
+                                + &quot;FROM parent_requests pr2 &quot;
+                                + &quot;WHERE pr2.child_user_id = c.id&quot;
+                                + &quot;) &quot;
+                                + &quot;WHERE c.role = 'STUDENT' &quot;
+                                + &quot;ORDER BY c.login_id ASC&quot;
+                );
+
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L299">        List&lt;Object[]&gt; rows =</span>
+<span class="nc" id="L300">                query.getResultList();</span>
+
+<span class="nc" id="L302">        List&lt;ParentRequest&gt; requests =</span>
+<span class="nc" id="L303">                convertRows(rows);</span>
+
+<span class="nc" id="L305">        attachOptions(requests);</span>
+
+<span class="nc" id="L307">        return requests;</span>
+
+    } finally {
+
+<span class="nc bnc" id="L311" title="All 4 branches missed.">        if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L312">            em.close();</span>
+        }
+    }
+}
+
+    public List&lt;ParentRequest&gt;
+    findUnfinishedForTeacher() {
+
+<span class="nc" id="L320">        return findUnfinishedForTeacher(null);</span>
+    }
+
+    /*
+     * 第一希望发生冲突时，可按照第一希望时间
+     * 取得需要手动确认的学生。
+     */
+    public List&lt;ParentRequest&gt;
+    findUnfinishedForTeacher(Long firstOptionId) {
+
+<span class="nc" id="L330">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L333">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L335">            String sql =</span>
+<span class="nc" id="L336">                    &quot;SELECT pr.id, &quot;</span>
+                            + &quot;pr.parent_user_id, &quot;
+                            + &quot;u.display_name, &quot;
+                            + &quot;pr.child_user_id, &quot;
+                            + &quot;pr.child_name, &quot;
+                            + &quot;pr.comment, &quot;
+                            + &quot;pr.request_status, &quot;
+                            + &quot;DATE_FORMAT(&quot;
+                            + &quot;pr.created_at, &quot;
+                            + &quot;'%Y-%m-%d %H:%i:%s'), &quot;
+                            + &quot;pc.has_sibling_flag, &quot;
+                            + &quot;pc.sibling_group &quot;
+                            + &quot;FROM parent_requests pr &quot;
+                            + &quot;JOIN users u &quot;
+                            + &quot;ON pr.parent_user_id = u.id &quot;
+                            + &quot;LEFT JOIN parent_children pc &quot;
+                            + &quot;ON pr.parent_user_id &quot;
+                            + &quot;= pc.parent_user_id &quot;
+                            + &quot;AND pr.child_user_id &quot;
+                            + &quot;= pc.child_user_id &quot;
+                            + &quot;LEFT JOIN final_plans fp &quot;
+                            + &quot;ON pr.id = fp.parent_request_id &quot;
+                            + &quot;WHERE pr.request_status IN &quot;
+                            + &quot;('SUBMITTED', 'MANUAL_REQUIRED') &quot;
+                            + &quot;AND fp.id IS NULL &quot;;
+
+<span class="nc bnc" id="L362" title="All 2 branches missed.">            if (firstOptionId != null) {</span>
+<span class="nc" id="L363">                sql +=</span>
+<span class="nc" id="L364">                        &quot;AND EXISTS (&quot;</span>
+                                + &quot;SELECT 1 &quot;
+                                + &quot;FROM parent_request_options pro &quot;
+                                + &quot;WHERE pro.parent_request_id &quot;
+                                + &quot;= pr.id &quot;
+                                + &quot;AND pro.priority = 1 &quot;
+                                + &quot;AND pro.reservation_option_id &quot;
+                                + &quot;= :firstOptionId&quot;
+                                + &quot;) &quot;;
+            }
+
+<span class="nc" id="L375">            sql +=</span>
+<span class="nc" id="L376">                    &quot;ORDER BY &quot;</span>
+                            + &quot;pr.parent_user_id ASC, &quot;
+                            + &quot;pr.created_at ASC&quot;;
+
+<span class="nc" id="L380">            Query query =</span>
+<span class="nc" id="L381">                    em.createNativeQuery(sql);</span>
+
+<span class="nc bnc" id="L383" title="All 2 branches missed.">            if (firstOptionId != null) {</span>
+<span class="nc" id="L384">                query.setParameter(</span>
+<span class="nc" id="L385">                        &quot;firstOptionId&quot;,</span>
+<span class="nc" id="L386">                        firstOptionId</span>
+                );
+            }
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L391">            List&lt;Object[]&gt; rows =</span>
+<span class="nc" id="L392">                    query.getResultList();</span>
+
+<span class="nc" id="L394">            List&lt;ParentRequest&gt; requests =</span>
+<span class="nc" id="L395">                    convertRows(rows);</span>
+
+<span class="nc" id="L397">            attachOptions(requests);</span>
+<span class="nc" id="L398">            applyRecommendedOptions(requests);</span>
+
+<span class="nc" id="L400">            return requests;</span>
+
+        } finally {
+
+<span class="nc bnc" id="L404" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L405">                em.close();</span>
+            }
+        }
+    }
+
+    public List&lt;ParentRequest&gt; findByParentUserId(
+            Long parentUserId) {
+
+<span class="nc" id="L413">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L416">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L418">            Query query =</span>
+<span class="nc" id="L419">                    em.createNativeQuery(</span>
+<span class="nc" id="L420">                            &quot;SELECT pr.id, &quot;</span>
+                                    + &quot;pr.parent_user_id, &quot;
+                                    + &quot;u.display_name, &quot;
+                                    + &quot;pr.child_user_id, &quot;
+                                    + &quot;pr.child_name, &quot;
+                                    + &quot;pr.comment, &quot;
+                                    + &quot;pr.request_status, &quot;
+                                    + &quot;DATE_FORMAT(&quot;
+                                    + &quot;pr.created_at, &quot;
+                                    + &quot;'%Y-%m-%d %H:%i:%s'), &quot;
+                                    + &quot;pc.has_sibling_flag, &quot;
+                                    + &quot;pc.sibling_group &quot;
+                                    + &quot;FROM parent_requests pr &quot;
+                                    + &quot;JOIN users u &quot;
+                                    + &quot;ON pr.parent_user_id = u.id &quot;
+                                    + &quot;LEFT JOIN parent_children pc &quot;
+                                    + &quot;ON pr.parent_user_id &quot;
+                                    + &quot;= pc.parent_user_id &quot;
+                                    + &quot;AND pr.child_user_id &quot;
+                                    + &quot;= pc.child_user_id &quot;
+                                    + &quot;WHERE pr.parent_user_id &quot;
+                                    + &quot;= :parentUserId &quot;
+                                    + &quot;ORDER BY pr.created_at DESC&quot;
+                    );
+
+<span class="nc" id="L445">            query.setParameter(</span>
+<span class="nc" id="L446">                    &quot;parentUserId&quot;,</span>
+<span class="nc" id="L447">                    parentUserId</span>
+            );
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L451">            List&lt;Object[]&gt; rows =</span>
+<span class="nc" id="L452">                    query.getResultList();</span>
+
+<span class="nc" id="L454">            List&lt;ParentRequest&gt; requests =</span>
+<span class="nc" id="L455">                    convertRows(rows);</span>
+
+<span class="nc" id="L457">            attachOptions(requests);</span>
+<span class="nc" id="L458">            applyRecommendedOptions(requests);</span>
+
+<span class="nc" id="L460">            return requests;</span>
+
+        } finally {
+
+<span class="nc bnc" id="L464" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L465">                em.close();</span>
+            }
+        }
+    }
+
+    public ParentRequest findById(Long id) {
+
+<span class="nc" id="L472">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L475">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L477">            Query query =</span>
+<span class="nc" id="L478">                    em.createNativeQuery(</span>
+<span class="nc" id="L479">                            &quot;SELECT pr.id, &quot;</span>
+                                    + &quot;pr.parent_user_id, &quot;
+                                    + &quot;u.display_name, &quot;
+                                    + &quot;pr.child_user_id, &quot;
+                                    + &quot;pr.child_name, &quot;
+                                    + &quot;pr.comment, &quot;
+                                    + &quot;pr.request_status, &quot;
+                                    + &quot;DATE_FORMAT(&quot;
+                                    + &quot;pr.created_at, &quot;
+                                    + &quot;'%Y-%m-%d %H:%i:%s'), &quot;
+                                    + &quot;pc.has_sibling_flag, &quot;
+                                    + &quot;pc.sibling_group &quot;
+                                    + &quot;FROM parent_requests pr &quot;
+                                    + &quot;JOIN users u &quot;
+                                    + &quot;ON pr.parent_user_id = u.id &quot;
+                                    + &quot;LEFT JOIN parent_children pc &quot;
+                                    + &quot;ON pr.parent_user_id &quot;
+                                    + &quot;= pc.parent_user_id &quot;
+                                    + &quot;AND pr.child_user_id &quot;
+                                    + &quot;= pc.child_user_id &quot;
+                                    + &quot;WHERE pr.id = :id&quot;
+                    );
+
+<span class="nc" id="L502">            query.setParameter(&quot;id&quot;, id);</span>
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L505">            List&lt;Object[]&gt; rows =</span>
+<span class="nc" id="L506">                    query.getResultList();</span>
+
+<span class="nc" id="L508">            List&lt;ParentRequest&gt; result =</span>
+<span class="nc" id="L509">                    convertRows(rows);</span>
+
+<span class="nc bnc" id="L511" title="All 2 branches missed.">            if (result.isEmpty()) {</span>
+<span class="nc" id="L512">                return null;</span>
+            }
+
+<span class="nc" id="L515">            attachOptions(result);</span>
+<span class="nc" id="L516">            applyRecommendedOptions(result);</span>
+
+<span class="nc" id="L518">            return result.get(0);</span>
+
+        } finally {
+
+<span class="nc bnc" id="L522" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L523">                em.close();</span>
+            }
+        }
+    }
+
+    public void updateStatus(
+            Long requestId,
+            String status) {
+
+<span class="nc" id="L532">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L535">            em = JpaUtil.createEntityManager();</span>
+<span class="nc" id="L536">            em.getTransaction().begin();</span>
+
+<span class="nc" id="L538">            Query query =</span>
+<span class="nc" id="L539">                    em.createNativeQuery(</span>
+<span class="nc" id="L540">                            &quot;UPDATE parent_requests &quot;</span>
+                                    + &quot;SET request_status = :status &quot;
+                                    + &quot;WHERE id = :id&quot;
+                    );
+
+<span class="nc" id="L545">            query.setParameter(</span>
+<span class="nc" id="L546">                    &quot;status&quot;,</span>
+<span class="nc" id="L547">                    status</span>
+            );
+
+<span class="nc" id="L550">            query.setParameter(</span>
+<span class="nc" id="L551">                    &quot;id&quot;,</span>
+<span class="nc" id="L552">                    requestId</span>
+            );
+
+<span class="nc" id="L555">            query.executeUpdate();</span>
+
+<span class="nc" id="L557">            em.getTransaction().commit();</span>
+
+<span class="nc" id="L559">        } catch (RuntimeException e) {</span>
+
+<span class="nc bnc" id="L561" title="All 2 branches missed.">            if (em != null</span>
+<span class="nc bnc" id="L562" title="All 2 branches missed.">                    &amp;&amp; em.getTransaction().isActive()) {</span>
+
+<span class="nc" id="L564">                em.getTransaction().rollback();</span>
+            }
+
+<span class="nc" id="L567">            throw e;</span>
+
+        } finally {
+
+<span class="nc bnc" id="L571" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L572">                em.close();</span>
+            }
+        }
+<span class="nc" id="L575">    }</span>
+
+    private void attachOptions(
+            List&lt;ParentRequest&gt; requests) {
+
+<span class="nc bnc" id="L580" title="All 2 branches missed.">        for (ParentRequest request : requests) {</span>
+
+<span class="nc bnc" id="L582" title="All 2 branches missed.">            if (request.getId() == null) {</span>
+<span class="nc" id="L583">                continue;</span>
+            }
+
+<span class="nc" id="L586">            request.setFirstOption(</span>
+<span class="nc" id="L587">                    findOptionByRequestIdAndPriority(</span>
+<span class="nc" id="L588">                            request.getId(),</span>
+<span class="nc" id="L589">                            1</span>
+                    )
+            );
+
+<span class="nc" id="L593">            request.setSecondOption(</span>
+<span class="nc" id="L594">                    findOptionByRequestIdAndPriority(</span>
+<span class="nc" id="L595">                            request.getId(),</span>
+<span class="nc" id="L596">                            2</span>
+                    )
+            );
+
+<span class="nc" id="L600">            request.setThirdOption(</span>
+<span class="nc" id="L601">                    findOptionByRequestIdAndPriority(</span>
+<span class="nc" id="L602">                            request.getId(),</span>
+<span class="nc" id="L603">                            3</span>
+                    )
+            );
+        }
+<span class="nc" id="L607">    }</span>
+
+    private ReservationOption
+    findOptionByRequestIdAndPriority(
+            Long requestId,
+            int priority) {
+
+<span class="nc" id="L614">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L617">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L619">            Query query =</span>
+<span class="nc" id="L620">                    em.createNativeQuery(</span>
+<span class="nc" id="L621">                            &quot;SELECT ro.id, &quot;</span>
+                                    + &quot;DATE_FORMAT(&quot;
+                                    + &quot;ro.option_date, '%Y-%m-%d'), &quot;
+                                    + &quot;ro.option_time, &quot;
+                                    + &quot;ro.available_flag &quot;
+                                    + &quot;FROM parent_request_options pro &quot;
+                                    + &quot;JOIN reservation_options ro &quot;
+                                    + &quot;ON pro.reservation_option_id &quot;
+                                    + &quot;= ro.id &quot;
+                                    + &quot;WHERE pro.parent_request_id &quot;
+                                    + &quot;= :requestId &quot;
+                                    + &quot;AND pro.priority = :priority&quot;
+                    );
+
+<span class="nc" id="L635">            query.setParameter(</span>
+<span class="nc" id="L636">                    &quot;requestId&quot;,</span>
+<span class="nc" id="L637">                    requestId</span>
+            );
+
+<span class="nc" id="L640">            query.setParameter(</span>
+<span class="nc" id="L641">                    &quot;priority&quot;,</span>
+<span class="nc" id="L642">                    priority</span>
+            );
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L646">            List&lt;Object[]&gt; rows =</span>
+<span class="nc" id="L647">                    query.getResultList();</span>
+
+<span class="nc bnc" id="L649" title="All 2 branches missed.">            if (rows.isEmpty()) {</span>
+<span class="nc" id="L650">                return null;</span>
+            }
+
+<span class="nc" id="L653">            Object[] row = rows.get(0);</span>
+
+<span class="nc" id="L655">            ReservationOption option =</span>
+<span class="nc" id="L656">                    new ReservationOption();</span>
+
+<span class="nc" id="L658">            option.setId(</span>
+<span class="nc" id="L659">                    ((Number) row[0]).longValue()</span>
+            );
+
+<span class="nc" id="L662">            option.setDate(</span>
+<span class="nc" id="L663">                    (String) row[1]</span>
+            );
+
+<span class="nc" id="L666">            option.setTime(</span>
+<span class="nc" id="L667">                    (String) row[2]</span>
+            );
+
+<span class="nc" id="L670">            option.setAvailable(</span>
+<span class="nc" id="L671">                    toBoolean(row[3])</span>
+            );
+
+<span class="nc" id="L674">            return option;</span>
+
+        } finally {
+
+<span class="nc bnc" id="L678" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L679">                em.close();</span>
+            }
+        }
+    }
+
+    /*
+     * 教师手动确认画面中使用的推荐候选。
+     * 实际的冲突判定仍然只确认第一希望。
+     */
+    private void applyRecommendedOptions(
+            List&lt;ParentRequest&gt; requests) {
+
+<span class="nc" id="L691">        Set&lt;Long&gt; usedOptionIds =</span>
+<span class="nc" id="L692">                new HashSet&lt;&gt;();</span>
+
+<span class="nc bnc" id="L694" title="All 2 branches missed.">        for (ParentRequest request : requests) {</span>
+
+<span class="nc bnc" id="L696" title="All 2 branches missed.">            if (request.getId() == null) {</span>
+<span class="nc" id="L697">                continue;</span>
+            }
+
+<span class="nc" id="L700">            ReservationOption siblingBase =</span>
+<span class="nc" id="L701">                    findSiblingBaseOption(</span>
+<span class="nc" id="L702">                            requests,</span>
+<span class="nc" id="L703">                            request</span>
+                    );
+
+<span class="nc bnc" id="L706" title="All 2 branches missed.">            if (request.isHasSibling()</span>
+<span class="nc bnc" id="L707" title="All 2 branches missed.">                    &amp;&amp; siblingBase != null) {</span>
+
+<span class="nc" id="L709">                ReservationOption nearOption =</span>
+<span class="nc" id="L710">                        findNearSiblingOption(</span>
+<span class="nc" id="L711">                                request,</span>
+<span class="nc" id="L712">                                siblingBase,</span>
+<span class="nc" id="L713">                                usedOptionIds</span>
+                        );
+
+<span class="nc bnc" id="L716" title="All 2 branches missed.">                if (nearOption != null) {</span>
+
+<span class="nc" id="L718">                    request.setRecommendedOption(</span>
+<span class="nc" id="L719">                            nearOption</span>
+                    );
+
+<span class="nc" id="L722">                    request.setRecommendedPriorityLabel(</span>
+<span class="nc" id="L723">                            getPriorityLabel(</span>
+<span class="nc" id="L724">                                    request,</span>
+<span class="nc" id="L725">                                    nearOption</span>
+                            )
+                    );
+
+<span class="nc" id="L729">                    request.setRecommendationMessage(</span>
+<span class="nc" id="L730">                            &quot;兄弟調整：同じ日で&quot;</span>
+                                    + &quot;近い時間のため推薦&quot;
+                    );
+
+<span class="nc" id="L734">                    usedOptionIds.add(</span>
+<span class="nc" id="L735">                            nearOption.getId()</span>
+                    );
+
+<span class="nc" id="L738">                    continue;</span>
+                }
+            }
+
+<span class="nc" id="L742">            ReservationOption normalOption =</span>
+<span class="nc" id="L743">                    findFirstAvailableOption(</span>
+<span class="nc" id="L744">                            request,</span>
+<span class="nc" id="L745">                            usedOptionIds</span>
+                    );
+
+<span class="nc bnc" id="L748" title="All 2 branches missed.">            if (normalOption != null) {</span>
+
+<span class="nc" id="L750">                request.setRecommendedOption(</span>
+<span class="nc" id="L751">                        normalOption</span>
+                );
+
+<span class="nc" id="L754">                request.setRecommendedPriorityLabel(</span>
+<span class="nc" id="L755">                        getPriorityLabel(</span>
+<span class="nc" id="L756">                                request,</span>
+<span class="nc" id="L757">                                normalOption</span>
+                        )
+                );
+
+<span class="nc bnc" id="L761" title="All 2 branches missed.">                if (request.isHasSibling()) {</span>
+<span class="nc" id="L762">                    request.setRecommendationMessage(</span>
+<span class="nc" id="L763">                            &quot;兄弟あり：&quot;</span>
+                                    + &quot;通常の希望順位で推薦&quot;
+                    );
+
+<span class="nc" id="L767">                } else {</span>
+<span class="nc" id="L768">                    request.setRecommendationMessage(</span>
+<span class="nc" id="L769">                            &quot;先着順と希望順位により推薦&quot;</span>
+                    );
+                }
+
+<span class="nc" id="L773">                usedOptionIds.add(</span>
+<span class="nc" id="L774">                        normalOption.getId()</span>
+                );
+
+<span class="nc" id="L777">            } else {</span>
+
+<span class="nc" id="L779">                request.setRecommendedOption(null);</span>
+
+<span class="nc" id="L781">                request.setRecommendedPriorityLabel(</span>
+<span class="nc" id="L782">                        &quot;要調整&quot;</span>
+                );
+
+<span class="nc bnc" id="L785" title="All 2 branches missed.">                if (request.isHasSibling()) {</span>
+<span class="nc" id="L786">                    request.setRecommendationMessage(</span>
+<span class="nc" id="L787">                            &quot;兄弟あり：&quot;</span>
+                                    + &quot;利用可能な候補がないため要調整&quot;
+                    );
+
+<span class="nc" id="L791">                } else {</span>
+<span class="nc" id="L792">                    request.setRecommendationMessage(</span>
+<span class="nc" id="L793">                            &quot;利用可能な希望がありません&quot;</span>
+                    );
+                }
+            }
+        }
+<span class="nc" id="L798">    }</span>
+
+    private ReservationOption
+    findFirstAvailableOption(
+            ParentRequest request,
+            Set&lt;Long&gt; usedOptionIds) {
+
+<span class="nc" id="L805">        ReservationOption[] options = {</span>
+<span class="nc" id="L806">                request.getFirstOption(),</span>
+<span class="nc" id="L807">                request.getSecondOption(),</span>
+<span class="nc" id="L808">                request.getThirdOption()</span>
+        };
+
+<span class="nc bnc" id="L811" title="All 2 branches missed.">        for (ReservationOption option : options) {</span>
+
+<span class="nc bnc" id="L813" title="All 2 branches missed.">            if (option != null</span>
+<span class="nc bnc" id="L814" title="All 2 branches missed.">                    &amp;&amp; option.isAvailable()</span>
+<span class="nc" id="L815">                    &amp;&amp; !usedOptionIds.contains(</span>
+<span class="nc bnc" id="L816" title="All 2 branches missed.">                    option.getId())) {</span>
+
+<span class="nc" id="L818">                return option;</span>
+            }
+        }
+
+<span class="nc" id="L822">        return null;</span>
+    }
+
+    private ReservationOption
+    findSiblingBaseOption(
+            List&lt;ParentRequest&gt; requests,
+            ParentRequest current) {
+
+<span class="nc bnc" id="L830" title="All 2 branches missed.">        for (ParentRequest other : requests) {</span>
+
+<span class="nc" id="L832">            if (other.getId().equals(</span>
+<span class="nc bnc" id="L833" title="All 2 branches missed.">                    current.getId())) {</span>
+
+<span class="nc" id="L835">                continue;</span>
+            }
+
+<span class="nc" id="L838">            if (other.getParentUserId().equals(</span>
+<span class="nc bnc" id="L839" title="All 2 branches missed.">                    current.getParentUserId())</span>
+<span class="nc bnc" id="L840" title="All 2 branches missed.">                    &amp;&amp; other.getRecommendedOption()</span>
+                    != null) {
+
+<span class="nc" id="L843">                return other.getRecommendedOption();</span>
+            }
+        }
+
+<span class="nc" id="L847">        return null;</span>
+    }
+
+    private ReservationOption
+    findNearSiblingOption(
+            ParentRequest request,
+            ReservationOption base,
+            Set&lt;Long&gt; usedOptionIds) {
+
+<span class="nc" id="L856">        ReservationOption best = null;</span>
+<span class="nc" id="L857">        int bestScore = -1;</span>
+
+<span class="nc" id="L859">        ReservationOption[] options = {</span>
+<span class="nc" id="L860">                request.getFirstOption(),</span>
+<span class="nc" id="L861">                request.getSecondOption(),</span>
+<span class="nc" id="L862">                request.getThirdOption()</span>
+        };
+
+<span class="nc bnc" id="L865" title="All 2 branches missed.">        for (ReservationOption option : options) {</span>
+
+<span class="nc bnc" id="L867" title="All 2 branches missed.">            if (option == null</span>
+<span class="nc bnc" id="L868" title="All 2 branches missed.">                    || !option.isAvailable()</span>
+<span class="nc" id="L869">                    || usedOptionIds.contains(</span>
+<span class="nc bnc" id="L870" title="All 2 branches missed.">                    option.getId())) {</span>
+
+<span class="nc" id="L872">                continue;</span>
+            }
+
+<span class="nc" id="L875">            int score =</span>
+<span class="nc" id="L876">                    scoreSiblingOption(</span>
+<span class="nc" id="L877">                            option,</span>
+<span class="nc" id="L878">                            base</span>
+                    );
+
+<span class="nc bnc" id="L881" title="All 2 branches missed.">            if (score &gt; bestScore) {</span>
+<span class="nc" id="L882">                bestScore = score;</span>
+<span class="nc" id="L883">                best = option;</span>
+            }
+        }
+
+<span class="nc" id="L887">        return best;</span>
+    }
+
+    private int scoreSiblingOption(
+            ReservationOption option,
+            ReservationOption base) {
+
+<span class="nc" id="L894">        int score = 0;</span>
+
+<span class="nc" id="L896">        if (option.getDate().equals(</span>
+<span class="nc bnc" id="L897" title="All 2 branches missed.">                base.getDate())) {</span>
+
+<span class="nc" id="L899">            score += 100;</span>
+        }
+
+<span class="nc" id="L902">        int diff =</span>
+<span class="nc" id="L903">                Math.abs(</span>
+<span class="nc" id="L904">                        getStartMinutes(</span>
+<span class="nc" id="L905">                                option.getTime()</span>
+                        )
+<span class="nc" id="L907">                                - getStartMinutes(</span>
+<span class="nc" id="L908">                                base.getTime()</span>
+                        )
+                );
+
+<span class="nc bnc" id="L912" title="All 2 branches missed.">        if (diff == 40) {</span>
+<span class="nc" id="L913">            score += 60;</span>
+
+<span class="nc bnc" id="L915" title="All 2 branches missed.">        } else if (diff == 80) {</span>
+<span class="nc" id="L916">            score += 40;</span>
+
+<span class="nc bnc" id="L918" title="All 2 branches missed.">        } else if (diff == 120) {</span>
+<span class="nc" id="L919">            score += 20;</span>
+        }
+
+<span class="nc" id="L922">        return score;</span>
+    }
+
+    private int getStartMinutes(
+            String timeRange) {
+
+<span class="nc bnc" id="L928" title="All 2 branches missed.">        if (timeRange == null</span>
+<span class="nc bnc" id="L929" title="All 2 branches missed.">                || !timeRange.contains(&quot;:&quot;)) {</span>
+
+<span class="nc" id="L931">            return 0;</span>
+        }
+
+<span class="nc" id="L934">        String start =</span>
+<span class="nc" id="L935">                timeRange.split(&quot;-&quot;)[0];</span>
+
+<span class="nc" id="L937">        String[] parts =</span>
+<span class="nc" id="L938">                start.split(&quot;:&quot;);</span>
+
+<span class="nc" id="L940">        return Integer.parseInt(parts[0])</span>
+<span class="nc" id="L941">                * 60</span>
+<span class="nc" id="L942">                + Integer.parseInt(parts[1]);</span>
+    }
+
+    private String getPriorityLabel(
+            ParentRequest request,
+            ReservationOption option) {
+
+<span class="nc bnc" id="L949" title="All 2 branches missed.">        if (request.getFirstOption() != null</span>
+<span class="nc" id="L950">                &amp;&amp; request.getFirstOption()</span>
+<span class="nc" id="L951">                .getId()</span>
+<span class="nc bnc" id="L952" title="All 2 branches missed.">                .equals(option.getId())) {</span>
+
+<span class="nc" id="L954">            return &quot;第1希望&quot;;</span>
+        }
+
+<span class="nc bnc" id="L957" title="All 2 branches missed.">        if (request.getSecondOption() != null</span>
+<span class="nc" id="L958">                &amp;&amp; request.getSecondOption()</span>
+<span class="nc" id="L959">                .getId()</span>
+<span class="nc bnc" id="L960" title="All 2 branches missed.">                .equals(option.getId())) {</span>
+
+<span class="nc" id="L962">            return &quot;第2希望&quot;;</span>
+        }
+
+<span class="nc bnc" id="L965" title="All 2 branches missed.">        if (request.getThirdOption() != null</span>
+<span class="nc" id="L966">                &amp;&amp; request.getThirdOption()</span>
+<span class="nc" id="L967">                .getId()</span>
+<span class="nc bnc" id="L968" title="All 2 branches missed.">                .equals(option.getId())) {</span>
+
+<span class="nc" id="L970">            return &quot;第3希望&quot;;</span>
+        }
+
+<span class="nc" id="L973">        return &quot;推薦候補&quot;;</span>
+    }
+
+    private List&lt;ParentRequest&gt; convertRows(
+            List&lt;Object[]&gt; rows) {
+
+<span class="nc" id="L979">        List&lt;ParentRequest&gt; result =</span>
+<span class="nc" id="L980">                new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L982" title="All 2 branches missed.">        for (Object[] row : rows) {</span>
+
+<span class="nc" id="L984">            ParentRequest request =</span>
+<span class="nc" id="L985">                    new ParentRequest();</span>
+
+<span class="nc bnc" id="L987" title="All 2 branches missed.">            if (row[0] != null) {</span>
+<span class="nc" id="L988">                request.setId(</span>
+<span class="nc" id="L989">                        ((Number) row[0])</span>
+<span class="nc" id="L990">                                .longValue()</span>
+                );
+            }
+
+<span class="nc bnc" id="L994" title="All 2 branches missed.">            if (row[1] != null) {</span>
+<span class="nc" id="L995">                request.setParentUserId(</span>
+<span class="nc" id="L996">                        ((Number) row[1])</span>
+<span class="nc" id="L997">                                .longValue()</span>
+                );
+            }
+
+<span class="nc" id="L1001">            request.setParentUsername(</span>
+<span class="nc" id="L1002">                    (String) row[2]</span>
+            );
+
+<span class="nc bnc" id="L1005" title="All 2 branches missed.">            if (row[3] != null) {</span>
+<span class="nc" id="L1006">                request.setChildUserId(</span>
+<span class="nc" id="L1007">                        ((Number) row[3])</span>
+<span class="nc" id="L1008">                                .longValue()</span>
+                );
+            }
+
+<span class="nc" id="L1012">            request.setChildName(</span>
+<span class="nc" id="L1013">                    (String) row[4]</span>
+            );
+
+<span class="nc" id="L1016">            request.setComment(</span>
+<span class="nc" id="L1017">                    (String) row[5]</span>
+            );
+
+<span class="nc" id="L1020">            request.setRequestStatus(</span>
+<span class="nc" id="L1021">                    (String) row[6]</span>
+            );
+
+<span class="nc" id="L1024">            request.setCreatedAt(</span>
+<span class="nc" id="L1025">                    (String) row[7]</span>
+            );
+
+<span class="nc" id="L1028">            request.setHasSibling(</span>
+<span class="nc" id="L1029">                    toBoolean(row[8])</span>
+            );
+
+<span class="nc" id="L1032">            request.setSiblingGroup(</span>
+<span class="nc" id="L1033">                    (String) row[9]</span>
+            );
+
+<span class="nc" id="L1036">            request.setManualRequired(</span>
+<span class="nc" id="L1037">                    &quot;MANUAL_REQUIRED&quot;.equals(</span>
+<span class="nc" id="L1038">                            request.getRequestStatus()</span>
+                    )
+            );
+
+<span class="nc" id="L1042">            result.add(request);</span>
+        }
+
+<span class="nc" id="L1045">        return result;</span>
+    }
+
+    private boolean toBoolean(Object value) {
+
+<span class="nc bnc" id="L1050" title="All 2 branches missed.">        if (value instanceof Boolean) {</span>
+<span class="nc" id="L1051">            return (Boolean) value;</span>
+        }
+
+<span class="nc bnc" id="L1054" title="All 2 branches missed.">        if (value instanceof Number) {</span>
+<span class="nc bnc" id="L1055" title="All 2 branches missed.">            return ((Number) value)</span>
+<span class="nc" id="L1056">                    .intValue() == 1;</span>
+        }
+
+<span class="nc" id="L1059">        return false;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

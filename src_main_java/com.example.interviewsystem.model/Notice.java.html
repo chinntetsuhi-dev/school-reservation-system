@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>Notice.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.model</a> &gt; <span class="el_source">Notice.java</span></div><h1>Notice.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.model;
+
+public class Notice {
+
+    private Long id;
+    private String title;
+    private String content;
+    private boolean active;
+    private String targetRole;
+
+<span class="nc" id="L11">    public Notice() {</span>
+<span class="nc" id="L12">    }</span>
+
+<span class="fc" id="L14">    public Notice(Long id, String title, String content, boolean active, String targetRole) {</span>
+<span class="fc" id="L15">        this.id = id;</span>
+<span class="fc" id="L16">        this.title = title;</span>
+<span class="fc" id="L17">        this.content = content;</span>
+<span class="fc" id="L18">        this.active = active;</span>
+<span class="fc" id="L19">        this.targetRole = targetRole;</span>
+<span class="fc" id="L20">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L23">        return id;</span>
+    }
+
+    public String getTitle() {
+<span class="fc" id="L27">        return title;</span>
+    }
+
+    public String getContent() {
+<span class="fc" id="L31">        return content;</span>
+    }
+
+    public boolean isActive() {
+<span class="fc" id="L35">        return active;</span>
+    }
+
+    public String getTargetRole() {
+<span class="fc" id="L39">        return targetRole;</span>
+    }
+
+    public String getTargetRoleLabel() {
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (&quot;PARENT&quot;.equals(targetRole)) return &quot;保護者&quot;;</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (&quot;STUDENT&quot;.equals(targetRole)) return &quot;児童&quot;;</span>
+<span class="nc" id="L45">        return &quot;保護者・児童&quot;;</span>
+    }
+
+    public String getStatusLabel() {
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        return active ? &quot;公開中&quot; : &quot;非公開&quot;;</span>
+    }
+
+    public void setId(Long id) {
+<span class="nc" id="L53">        this.id = id;</span>
+<span class="nc" id="L54">    }</span>
+
+    public void setTitle(String title) {
+<span class="nc" id="L57">        this.title = title;</span>
+<span class="nc" id="L58">    }</span>
+
+    public void setContent(String content) {
+<span class="nc" id="L61">        this.content = content;</span>
+<span class="nc" id="L62">    }</span>
+
+    public void setActive(boolean active) {
+<span class="nc" id="L65">        this.active = active;</span>
+<span class="nc" id="L66">    }</span>
+
+    public void setTargetRole(String targetRole) {
+<span class="nc" id="L69">        this.targetRole = targetRole;</span>
+<span class="nc" id="L70">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

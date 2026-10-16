@@ -1,0 +1,738 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ReservationDao.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.dao</a> &gt; <span class="el_source">ReservationDao.java</span></div><h1>ReservationDao.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.dao;
+
+import com.example.interviewsystem.model.ReservationOption;
+import com.example.interviewsystem.model.ScheduleStatus;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+<span class="fc" id="L16">public class ReservationDao {</span>
+
+    /*
+     * 演示画面中使用的固定日期。
+     */
+<span class="fc" id="L21">    public static final List&lt;String&gt; FIXED_DATES =</span>
+<span class="fc" id="L22">            Collections.unmodifiableList(</span>
+<span class="fc" id="L23">                    Arrays.asList(</span>
+<span class="fc" id="L24">                            &quot;2026-07-06&quot;,</span>
+<span class="fc" id="L25">                            &quot;2026-07-07&quot;,</span>
+<span class="fc" id="L26">                            &quot;2026-07-08&quot;,</span>
+<span class="fc" id="L27">                            &quot;2026-07-09&quot;,</span>
+<span class="fc" id="L28">                            &quot;2026-07-10&quot;</span>
+                    )
+            );
+
+    /*
+     * 演示画面中使用的固定时间。
+     */
+<span class="fc" id="L35">    public static final List&lt;String&gt; FIXED_TIMES =</span>
+<span class="fc" id="L36">            Collections.unmodifiableList(</span>
+<span class="fc" id="L37">                    Arrays.asList(</span>
+<span class="fc" id="L38">                            &quot;12:20&quot;,</span>
+<span class="fc" id="L39">                            &quot;13:00&quot;,</span>
+<span class="fc" id="L40">                            &quot;14:20&quot;,</span>
+<span class="fc" id="L41">                            &quot;15:00&quot;,</span>
+<span class="fc" id="L42">                            &quot;15:40&quot;,</span>
+<span class="fc" id="L43">                            &quot;16:20&quot;,</span>
+<span class="fc" id="L44">                            &quot;17:00&quot;,</span>
+<span class="fc" id="L45">                            &quot;17:40&quot;</span>
+                    )
+<span class="fc" id="L47">            );</span>
+
+    public List&lt;ReservationOption&gt; findOptions(
+            String date,
+            String facilityName,
+            boolean onlyAvailable) {
+
+<span class="fc" id="L54">        EntityManager em = null;</span>
+
+        try {
+<span class="fc" id="L57">            em = JpaUtil.createEntityManager();</span>
+
+<span class="fc" id="L59">            String sql =</span>
+<span class="fc" id="L60">                    &quot;SELECT id, &quot;</span>
+                            + &quot;DATE_FORMAT(option_date, '%Y-%m-%d'), &quot;
+                            + &quot;option_time, &quot;
+                            + &quot;available_flag &quot;
+                            + &quot;FROM reservation_options &quot;
+                            + &quot;WHERE option_date BETWEEN &quot;
+                            + &quot;'2026-07-06' AND '2026-07-10' &quot;;
+
+<span class="fc bfc" id="L68" title="All 2 branches covered.">            if (onlyAvailable) {</span>
+<span class="fc" id="L69">                sql += &quot;AND available_flag = 1 &quot;;</span>
+            }
+
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">            if (hasText(date)) {</span>
+<span class="fc" id="L73">                sql += &quot;AND option_date = :date &quot;;</span>
+            }
+
+<span class="fc" id="L76">            sql +=</span>
+<span class="fc" id="L77">                    &quot;ORDER BY option_date, &quot;</span>
+                            + &quot;FIELD(option_time, &quot;
+                            + &quot;'12:20',&quot;
+                            + &quot;'13:00',&quot;
+                            + &quot;'14:20',&quot;
+                            + &quot;'15:00',&quot;
+                            + &quot;'15:40',&quot;
+                            + &quot;'16:20',&quot;
+                            + &quot;'17:00',&quot;
+                            + &quot;'17:40')&quot;;
+
+<span class="fc" id="L88">            Query query =</span>
+<span class="fc" id="L89">                    em.createNativeQuery(sql);</span>
+
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">            if (hasText(date)) {</span>
+<span class="fc" id="L92">                query.setParameter(&quot;date&quot;, date);</span>
+            }
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L96">            List&lt;Object[]&gt; rows =</span>
+<span class="fc" id="L97">                    query.getResultList();</span>
+
+<span class="fc" id="L99">            List&lt;ReservationOption&gt; result =</span>
+<span class="fc" id="L100">                    new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L102" title="All 2 branches covered.">            for (Object[] row : rows) {</span>
+
+<span class="fc" id="L104">                ReservationOption option =</span>
+<span class="fc" id="L105">                        new ReservationOption();</span>
+
+<span class="fc" id="L107">                option.setId(</span>
+<span class="fc" id="L108">                        ((Number) row[0]).longValue()</span>
+                );
+
+<span class="fc" id="L111">                option.setDate(</span>
+<span class="fc" id="L112">                        (String) row[1]</span>
+                );
+
+<span class="fc" id="L115">                option.setTime(</span>
+<span class="fc" id="L116">                        (String) row[2]</span>
+                );
+
+<span class="fc" id="L119">                option.setAvailable(</span>
+<span class="fc" id="L120">                        toBoolean(row[3])</span>
+                );
+
+<span class="fc" id="L123">                result.add(option);</span>
+            }
+
+<span class="fc" id="L126">            return result;</span>
+
+        } finally {
+<span class="pc bpc" id="L129" title="2 of 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="fc" id="L130">                em.close();</span>
+            }
+        }
+    }
+
+    public List&lt;ReservationOption&gt; findAllOptions() {
+
+<span class="nc" id="L137">        ensureFixedOptions();</span>
+
+<span class="nc" id="L139">        return findOptions(</span>
+<span class="nc" id="L140">                null,</span>
+<span class="nc" id="L141">                null,</span>
+<span class="nc" id="L142">                false</span>
+        );
+    }
+
+    public List&lt;ReservationOption&gt; findAvailableOptions(
+            String date,
+            String facilityName) {
+
+<span class="nc" id="L150">        ensureFixedOptions();</span>
+
+<span class="nc" id="L152">        return findOptions(</span>
+<span class="nc" id="L153">                date,</span>
+<span class="nc" id="L154">                null,</span>
+<span class="nc" id="L155">                true</span>
+        );
+    }
+
+    public List&lt;ReservationOption&gt; findOptionsByDate(
+            String date) {
+
+<span class="nc" id="L162">        ensureOptionsForDate(date);</span>
+
+<span class="nc" id="L164">        return findOptions(</span>
+<span class="nc" id="L165">                date,</span>
+<span class="nc" id="L166">                null,</span>
+<span class="nc" id="L167">                false</span>
+        );
+    }
+
+    public String findFirstOptionDate() {
+<span class="nc" id="L172">        return FIXED_DATES.get(0);</span>
+    }
+
+    public List&lt;String&gt; findFixedDates() {
+
+<span class="nc" id="L177">        ensureFixedOptions();</span>
+
+<span class="nc" id="L179">        return FIXED_DATES;</span>
+    }
+
+    public List&lt;String&gt; findFixedTimes() {
+
+<span class="nc" id="L184">        ensureFixedOptions();</span>
+
+<span class="nc" id="L186">        return FIXED_TIMES;</span>
+    }
+
+    /*
+     * 固定日程に必要な時間データがなければ、
+     * reservation_optionsへ追加します。
+     */
+    public void ensureFixedOptions() {
+
+<span class="nc bnc" id="L195" title="All 2 branches missed.">        for (String date : FIXED_DATES) {</span>
+<span class="nc" id="L196">            ensureOptionsForDate(date);</span>
+        }
+<span class="nc" id="L198">    }</span>
+
+    public void ensureOptionsForDate(String date) {
+
+<span class="nc bnc" id="L202" title="All 2 branches missed.">        if (!hasText(date)</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">                || !FIXED_DATES.contains(date)) {</span>
+
+<span class="nc" id="L205">            return;</span>
+        }
+
+<span class="nc" id="L208">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L211">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L213">            Query countQuery =</span>
+<span class="nc" id="L214">                    em.createNativeQuery(</span>
+<span class="nc" id="L215">                            &quot;SELECT COUNT(*) &quot;</span>
+                                    + &quot;FROM reservation_options &quot;
+                                    + &quot;WHERE option_date = :date&quot;
+                    );
+
+<span class="nc" id="L220">            countQuery.setParameter(&quot;date&quot;, date);</span>
+
+<span class="nc" id="L222">            Number count =</span>
+<span class="nc" id="L223">                    (Number) countQuery.getSingleResult();</span>
+
+<span class="nc bnc" id="L225" title="All 2 branches missed.">            if (count.longValue()</span>
+<span class="nc" id="L226">                    == FIXED_TIMES.size()) {</span>
+
+<span class="nc" id="L228">                return;</span>
+            }
+
+<span class="nc" id="L231">            em.getTransaction().begin();</span>
+
+<span class="nc bnc" id="L233" title="All 2 branches missed.">            for (String time : FIXED_TIMES) {</span>
+
+<span class="nc" id="L235">                Query insertQuery =</span>
+<span class="nc" id="L236">                        em.createNativeQuery(</span>
+<span class="nc" id="L237">                                &quot;INSERT IGNORE INTO &quot;</span>
+                                        + &quot;reservation_options &quot;
+                                        + &quot;(option_date, &quot;
+                                        + &quot;option_time, &quot;
+                                        + &quot;available_flag) &quot;
+                                        + &quot;VALUES &quot;
+                                        + &quot;(:date, :time, 0)&quot;
+                        );
+
+<span class="nc" id="L246">                insertQuery.setParameter(</span>
+<span class="nc" id="L247">                        &quot;date&quot;,</span>
+<span class="nc" id="L248">                        date</span>
+                );
+
+<span class="nc" id="L251">                insertQuery.setParameter(</span>
+<span class="nc" id="L252">                        &quot;time&quot;,</span>
+<span class="nc" id="L253">                        time</span>
+                );
+
+<span class="nc" id="L256">                insertQuery.executeUpdate();</span>
+            }
+
+<span class="nc" id="L259">            em.getTransaction().commit();</span>
+
+<span class="nc" id="L261">        } catch (RuntimeException e) {</span>
+
+<span class="nc bnc" id="L263" title="All 2 branches missed.">            if (em != null</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">                    &amp;&amp; em.getTransaction().isActive()) {</span>
+
+<span class="nc" id="L266">                em.getTransaction().rollback();</span>
+            }
+
+<span class="nc" id="L269">            throw e;</span>
+
+        } finally {
+
+<span class="nc bnc" id="L273" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L274">                em.close();</span>
+            }
+        }
+<span class="nc" id="L277">    }</span>
+
+    /*
+     * 指定した日付だけの利用可能時間を保存します。
+     * 旧画面から利用される可能性があるため残しています。
+     */
+    public void saveAvailableOptionsForDate(
+            String date,
+            List&lt;Long&gt; availableOptionIds) {
+
+<span class="nc" id="L287">        ensureOptionsForDate(date);</span>
+
+<span class="nc" id="L289">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L292">            em = JpaUtil.createEntityManager();</span>
+<span class="nc" id="L293">            em.getTransaction().begin();</span>
+
+<span class="nc" id="L295">            Query resetQuery =</span>
+<span class="nc" id="L296">                    em.createNativeQuery(</span>
+<span class="nc" id="L297">                            &quot;UPDATE reservation_options ro &quot;</span>
+                                    + &quot;SET ro.available_flag = 0 &quot;
+                                    + &quot;WHERE ro.option_date = :date &quot;
+                                    + &quot;AND ro.id NOT IN &quot;
+                                    + &quot;(SELECT fp.selected_option_id &quot;
+                                    + &quot;FROM final_plans fp)&quot;
+                    );
+
+<span class="nc" id="L305">            resetQuery.setParameter(</span>
+<span class="nc" id="L306">                    &quot;date&quot;,</span>
+<span class="nc" id="L307">                    date</span>
+            );
+
+<span class="nc" id="L310">            resetQuery.executeUpdate();</span>
+
+<span class="nc bnc" id="L312" title="All 2 branches missed.">            if (availableOptionIds != null</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">                    &amp;&amp; !availableOptionIds.isEmpty()) {</span>
+
+<span class="nc" id="L315">                Query updateQuery =</span>
+<span class="nc" id="L316">                        em.createNativeQuery(</span>
+<span class="nc" id="L317">                                &quot;UPDATE reservation_options ro &quot;</span>
+                                        + &quot;SET ro.available_flag = 1 &quot;
+                                        + &quot;WHERE ro.option_date = :date &quot;
+                                        + &quot;AND ro.id IN (:ids) &quot;
+                                        + &quot;AND ro.id NOT IN &quot;
+                                        + &quot;(SELECT fp.selected_option_id &quot;
+                                        + &quot;FROM final_plans fp)&quot;
+                        );
+
+<span class="nc" id="L326">                updateQuery.setParameter(</span>
+<span class="nc" id="L327">                        &quot;date&quot;,</span>
+<span class="nc" id="L328">                        date</span>
+                );
+
+<span class="nc" id="L331">                updateQuery.setParameter(</span>
+<span class="nc" id="L332">                        &quot;ids&quot;,</span>
+<span class="nc" id="L333">                        availableOptionIds</span>
+                );
+
+<span class="nc" id="L336">                updateQuery.executeUpdate();</span>
+            }
+
+<span class="nc" id="L339">            em.getTransaction().commit();</span>
+
+<span class="nc" id="L341">        } catch (RuntimeException e) {</span>
+
+<span class="nc bnc" id="L343" title="All 2 branches missed.">            if (em != null</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">                    &amp;&amp; em.getTransaction().isActive()) {</span>
+
+<span class="nc" id="L346">                em.getTransaction().rollback();</span>
+            }
+
+<span class="nc" id="L349">            throw e;</span>
+
+        } finally {
+
+<span class="nc bnc" id="L353" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L354">                em.close();</span>
+            }
+        }
+<span class="nc" id="L357">    }</span>
+
+    /*
+     * 教師画面の固定時間表で選択された時間を保存します。
+     */
+    public void saveAvailableOptions(
+            List&lt;Long&gt; availableOptionIds) {
+
+<span class="nc" id="L365">        ensureFixedOptions();</span>
+
+<span class="nc" id="L367">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L370">            em = JpaUtil.createEntityManager();</span>
+<span class="nc" id="L371">            em.getTransaction().begin();</span>
+
+<span class="nc" id="L373">            Query resetQuery =</span>
+<span class="nc" id="L374">                    em.createNativeQuery(</span>
+<span class="nc" id="L375">                            &quot;UPDATE reservation_options ro &quot;</span>
+                                    + &quot;SET ro.available_flag = 0 &quot;
+                                    + &quot;WHERE ro.option_date BETWEEN &quot;
+                                    + &quot;'2026-07-06' &quot;
+                                    + &quot;AND '2026-07-10' &quot;
+                                    + &quot;AND ro.id NOT IN &quot;
+                                    + &quot;(SELECT fp.selected_option_id &quot;
+                                    + &quot;FROM final_plans fp)&quot;
+                    );
+
+<span class="nc" id="L385">            resetQuery.executeUpdate();</span>
+
+<span class="nc bnc" id="L387" title="All 2 branches missed.">            if (availableOptionIds != null</span>
+<span class="nc bnc" id="L388" title="All 2 branches missed.">                    &amp;&amp; !availableOptionIds.isEmpty()) {</span>
+
+<span class="nc" id="L390">                Query updateQuery =</span>
+<span class="nc" id="L391">                        em.createNativeQuery(</span>
+<span class="nc" id="L392">                                &quot;UPDATE reservation_options ro &quot;</span>
+                                        + &quot;SET ro.available_flag = 1 &quot;
+                                        + &quot;WHERE ro.id IN (:ids) &quot;
+                                        + &quot;AND ro.option_date BETWEEN &quot;
+                                        + &quot;'2026-07-06' &quot;
+                                        + &quot;AND '2026-07-10' &quot;
+                                        + &quot;AND ro.id NOT IN &quot;
+                                        + &quot;(SELECT fp.selected_option_id &quot;
+                                        + &quot;FROM final_plans fp)&quot;
+                        );
+
+<span class="nc" id="L403">                updateQuery.setParameter(</span>
+<span class="nc" id="L404">                        &quot;ids&quot;,</span>
+<span class="nc" id="L405">                        availableOptionIds</span>
+                );
+
+<span class="nc" id="L408">                updateQuery.executeUpdate();</span>
+            }
+
+<span class="nc" id="L411">            em.getTransaction().commit();</span>
+
+<span class="nc" id="L413">        } catch (RuntimeException e) {</span>
+
+<span class="nc bnc" id="L415" title="All 2 branches missed.">            if (em != null</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">                    &amp;&amp; em.getTransaction().isActive()) {</span>
+
+<span class="nc" id="L418">                em.getTransaction().rollback();</span>
+            }
+
+<span class="nc" id="L421">            throw e;</span>
+
+        } finally {
+
+<span class="nc bnc" id="L425" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L426">                em.close();</span>
+            }
+        }
+<span class="nc" id="L429">    }</span>
+
+    /*
+     * 教師・保護者の日程表示で使用する一覧を取得します。
+     */
+    public List&lt;ScheduleStatus&gt; findScheduleStatus(
+            String date) {
+
+<span class="nc" id="L437">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L440">            ensureFixedOptions();</span>
+
+<span class="nc" id="L442">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L444">            String sql =</span>
+<span class="nc" id="L445">                    &quot;SELECT ro.id, &quot;</span>
+                            + &quot;DATE_FORMAT(&quot;
+                            + &quot;ro.option_date, '%Y-%m-%d'), &quot;
+                            + &quot;ro.option_time, &quot;
+                            + &quot;ro.available_flag, &quot;
+                            + &quot;fp.response_status, &quot;
+                            + &quot;u.display_name, &quot;
+                            + &quot;pr.child_name &quot;
+                            + &quot;FROM reservation_options ro &quot;
+                            + &quot;LEFT JOIN final_plans fp &quot;
+                            + &quot;ON ro.id = fp.selected_option_id &quot;
+                            + &quot;LEFT JOIN parent_requests pr &quot;
+                            + &quot;ON fp.parent_request_id = pr.id &quot;
+                            + &quot;LEFT JOIN users u &quot;
+                            + &quot;ON pr.parent_user_id = u.id &quot;
+                            + &quot;WHERE ro.option_date BETWEEN &quot;
+                            + &quot;'2026-07-06' &quot;
+                            + &quot;AND '2026-07-10' &quot;;
+
+<span class="nc bnc" id="L464" title="All 2 branches missed.">            if (hasText(date)) {</span>
+<span class="nc" id="L465">                sql += &quot;AND ro.option_date = :date &quot;;</span>
+            }
+
+<span class="nc" id="L468">            sql +=</span>
+<span class="nc" id="L469">                    &quot;ORDER BY ro.option_date ASC, &quot;</span>
+                            + &quot;FIELD(ro.option_time, &quot;
+                            + &quot;'12:20',&quot;
+                            + &quot;'13:00',&quot;
+                            + &quot;'14:20',&quot;
+                            + &quot;'15:00',&quot;
+                            + &quot;'15:40',&quot;
+                            + &quot;'16:20',&quot;
+                            + &quot;'17:00',&quot;
+                            + &quot;'17:40')&quot;;
+
+<span class="nc" id="L480">            Query query =</span>
+<span class="nc" id="L481">                    em.createNativeQuery(sql);</span>
+
+<span class="nc bnc" id="L483" title="All 2 branches missed.">            if (hasText(date)) {</span>
+<span class="nc" id="L484">                query.setParameter(&quot;date&quot;, date);</span>
+            }
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L488">            List&lt;Object[]&gt; rows =</span>
+<span class="nc" id="L489">                    query.getResultList();</span>
+
+<span class="nc" id="L491">            List&lt;ScheduleStatus&gt; result =</span>
+<span class="nc" id="L492">                    new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L494" title="All 2 branches missed.">            for (Object[] row : rows) {</span>
+
+<span class="nc" id="L496">                ScheduleStatus status =</span>
+<span class="nc" id="L497">                        new ScheduleStatus();</span>
+
+<span class="nc" id="L499">                status.setOptionId(</span>
+<span class="nc" id="L500">                        ((Number) row[0]).longValue()</span>
+                );
+
+<span class="nc" id="L503">                status.setDate(</span>
+<span class="nc" id="L504">                        (String) row[1]</span>
+                );
+
+<span class="nc" id="L507">                status.setTime(</span>
+<span class="nc" id="L508">                        (String) row[2]</span>
+                );
+
+<span class="nc" id="L511">                status.setAvailable(</span>
+<span class="nc" id="L512">                        toBoolean(row[3])</span>
+                );
+
+<span class="nc" id="L515">                status.setPlanStatus(</span>
+<span class="nc" id="L516">                        (String) row[4]</span>
+                );
+
+<span class="nc" id="L519">                status.setParentName(</span>
+<span class="nc" id="L520">                        (String) row[5]</span>
+                );
+
+<span class="nc" id="L523">                status.setChildName(</span>
+<span class="nc" id="L524">                        (String) row[6]</span>
+                );
+
+<span class="nc" id="L527">                result.add(status);</span>
+            }
+
+<span class="nc" id="L530">            return result;</span>
+
+        } finally {
+
+<span class="nc bnc" id="L534" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L535">                em.close();</span>
+            }
+        }
+    }
+
+    /*
+     * 今回は施設による絞り込みを行いません。
+     * 旧Controllerとの互換性のため残しています。
+     */
+    public Set&lt;String&gt; findFacilityNames() {
+<span class="nc" id="L545">        return new LinkedHashSet&lt;String&gt;();</span>
+    }
+
+    public ReservationOption findOptionById(
+            Long optionId) {
+
+<span class="nc bnc" id="L551" title="All 2 branches missed.">        if (optionId == null) {</span>
+<span class="nc" id="L552">            return null;</span>
+        }
+
+<span class="nc" id="L555">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L558">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L560">            Query query =</span>
+<span class="nc" id="L561">                    em.createNativeQuery(</span>
+<span class="nc" id="L562">                            &quot;SELECT id, &quot;</span>
+                                    + &quot;DATE_FORMAT(&quot;
+                                    + &quot;option_date, '%Y-%m-%d'), &quot;
+                                    + &quot;option_time, &quot;
+                                    + &quot;available_flag &quot;
+                                    + &quot;FROM reservation_options &quot;
+                                    + &quot;WHERE id = :id&quot;
+                    );
+
+<span class="nc" id="L571">            query.setParameter(</span>
+<span class="nc" id="L572">                    &quot;id&quot;,</span>
+<span class="nc" id="L573">                    optionId</span>
+            );
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L577">            List&lt;Object[]&gt; rows =</span>
+<span class="nc" id="L578">                    query.getResultList();</span>
+
+<span class="nc bnc" id="L580" title="All 2 branches missed.">            if (rows.isEmpty()) {</span>
+<span class="nc" id="L581">                return null;</span>
+            }
+
+<span class="nc" id="L584">            Object[] row = rows.get(0);</span>
+
+<span class="nc" id="L586">            ReservationOption option =</span>
+<span class="nc" id="L587">                    new ReservationOption();</span>
+
+<span class="nc" id="L589">            option.setId(</span>
+<span class="nc" id="L590">                    ((Number) row[0]).longValue()</span>
+            );
+
+<span class="nc" id="L593">            option.setDate(</span>
+<span class="nc" id="L594">                    (String) row[1]</span>
+            );
+
+<span class="nc" id="L597">            option.setTime(</span>
+<span class="nc" id="L598">                    (String) row[2]</span>
+            );
+
+<span class="nc" id="L601">            option.setAvailable(</span>
+<span class="nc" id="L602">                    toBoolean(row[3])</span>
+            );
+
+<span class="nc" id="L605">            return option;</span>
+
+        } finally {
+
+<span class="nc bnc" id="L609" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L610">                em.close();</span>
+            }
+        }
+    }
+
+    /*
+     * 第1希望から第3希望までが、
+     * すべて利用可能で重複していないか確認します。
+     */
+    public boolean areAvailableOptions(
+            List&lt;Long&gt; optionIds) {
+
+<span class="nc bnc" id="L622" title="All 2 branches missed.">        if (optionIds == null</span>
+<span class="nc bnc" id="L623" title="All 2 branches missed.">                || optionIds.isEmpty()) {</span>
+
+<span class="nc" id="L625">            return false;</span>
+        }
+
+<span class="nc" id="L628">        Set&lt;Long&gt; uniqueIds =</span>
+<span class="nc" id="L629">                new LinkedHashSet&lt;Long&gt;(optionIds);</span>
+
+<span class="nc bnc" id="L631" title="All 2 branches missed.">        if (uniqueIds.size()</span>
+<span class="nc" id="L632">                != optionIds.size()) {</span>
+
+<span class="nc" id="L634">            return false;</span>
+        }
+
+<span class="nc" id="L637">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L640">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L642">            Query query =</span>
+<span class="nc" id="L643">                    em.createNativeQuery(</span>
+<span class="nc" id="L644">                            &quot;SELECT COUNT(*) &quot;</span>
+                                    + &quot;FROM reservation_options &quot;
+                                    + &quot;WHERE id IN (:ids) &quot;
+                                    + &quot;AND available_flag = 1 &quot;
+                                    + &quot;AND option_date BETWEEN &quot;
+                                    + &quot;'2026-07-06' &quot;
+                                    + &quot;AND '2026-07-10'&quot;
+                    );
+
+<span class="nc" id="L653">            query.setParameter(</span>
+<span class="nc" id="L654">                    &quot;ids&quot;,</span>
+<span class="nc" id="L655">                    uniqueIds</span>
+            );
+
+<span class="nc" id="L658">            Number count =</span>
+<span class="nc" id="L659">                    (Number) query.getSingleResult();</span>
+
+<span class="nc bnc" id="L661" title="All 2 branches missed.">            return count.intValue()</span>
+<span class="nc" id="L662">                    == uniqueIds.size();</span>
+
+        } finally {
+
+<span class="nc bnc" id="L666" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L667">                em.close();</span>
+            }
+        }
+    }
+
+    public void updateAvailable(
+            Long optionId,
+            boolean available) {
+
+<span class="nc" id="L676">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L679">            em = JpaUtil.createEntityManager();</span>
+<span class="nc" id="L680">            em.getTransaction().begin();</span>
+
+<span class="nc" id="L682">            Query query =</span>
+<span class="nc" id="L683">                    em.createNativeQuery(</span>
+<span class="nc" id="L684">                            &quot;UPDATE reservation_options &quot;</span>
+                                    + &quot;SET available_flag = :available &quot;
+                                    + &quot;WHERE id = :id&quot;
+                    );
+
+<span class="nc" id="L689">            query.setParameter(</span>
+<span class="nc" id="L690">                    &quot;available&quot;,</span>
+<span class="nc bnc" id="L691" title="All 2 branches missed.">                    available ? 1 : 0</span>
+            );
+
+<span class="nc" id="L694">            query.setParameter(</span>
+<span class="nc" id="L695">                    &quot;id&quot;,</span>
+<span class="nc" id="L696">                    optionId</span>
+            );
+
+<span class="nc" id="L699">            query.executeUpdate();</span>
+
+<span class="nc" id="L701">            em.getTransaction().commit();</span>
+
+<span class="nc" id="L703">        } catch (RuntimeException e) {</span>
+
+<span class="nc bnc" id="L705" title="All 2 branches missed.">            if (em != null</span>
+<span class="nc bnc" id="L706" title="All 2 branches missed.">                    &amp;&amp; em.getTransaction().isActive()) {</span>
+
+<span class="nc" id="L708">                em.getTransaction().rollback();</span>
+            }
+
+<span class="nc" id="L711">            throw e;</span>
+
+        } finally {
+
+<span class="nc bnc" id="L715" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L716">                em.close();</span>
+            }
+        }
+<span class="nc" id="L719">    }</span>
+
+    private boolean toBoolean(Object value) {
+
+<span class="pc bpc" id="L723" title="1 of 2 branches missed.">        if (value instanceof Boolean) {</span>
+<span class="fc" id="L724">            return (Boolean) value;</span>
+        }
+
+<span class="nc bnc" id="L727" title="All 2 branches missed.">        if (value instanceof Number) {</span>
+<span class="nc bnc" id="L728" title="All 2 branches missed.">            return ((Number) value).intValue() == 1;</span>
+        }
+
+<span class="nc" id="L731">        return false;</span>
+    }
+
+    private boolean hasText(String value) {
+<span class="pc bpc" id="L735" title="2 of 4 branches missed.">        return value != null &amp;&amp; !value.trim().isEmpty();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

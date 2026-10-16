@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>NoticeDao.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.dao</a> &gt; <span class="el_source">NoticeDao.java</span></div><h1>NoticeDao.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.dao;
+
+import com.example.interviewsystem.model.Notice;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.List;
+
+<span class="fc" id="L10">public class NoticeDao {</span>
+
+    public List&lt;Notice&gt; findAll() {
+<span class="fc" id="L13">        EntityManager em = null;</span>
+
+        try {
+<span class="fc" id="L16">            em = JpaUtil.createEntityManager();</span>
+
+<span class="fc" id="L18">            Query query = em.createNativeQuery(</span>
+<span class="fc" id="L19">                    &quot;SELECT id, title, content, active_flag, target_role &quot; +</span>
+                    &quot;FROM notices ORDER BY id DESC&quot;
+            );
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L24">            List&lt;Object[]&gt; rows = query.getResultList();</span>
+
+<span class="fc" id="L26">            return convertRows(rows);</span>
+
+        } finally {
+<span class="pc bpc" id="L29" title="2 of 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="fc" id="L30">                em.close();</span>
+            }
+        }
+    }
+
+    public List&lt;Notice&gt; findActiveForRole(String role) {
+<span class="fc" id="L36">        EntityManager em = null;</span>
+
+        try {
+<span class="fc" id="L39">            em = JpaUtil.createEntityManager();</span>
+
+<span class="fc" id="L41">            Query query = em.createNativeQuery(</span>
+<span class="fc" id="L42">                    &quot;SELECT id, title, content, active_flag, target_role &quot; +</span>
+                    &quot;FROM notices &quot; +
+                    &quot;WHERE active_flag = 1 &quot; +
+                    &quot;AND (target_role = 'ALL' OR target_role = :role) &quot; +
+                    &quot;ORDER BY id DESC&quot;
+            );
+
+<span class="fc" id="L49">            query.setParameter(&quot;role&quot;, role);</span>
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L52">            List&lt;Object[]&gt; rows = query.getResultList();</span>
+
+<span class="fc" id="L54">            return convertRows(rows);</span>
+
+        } finally {
+<span class="pc bpc" id="L57" title="2 of 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="fc" id="L58">                em.close();</span>
+            }
+        }
+    }
+
+    public Notice findById(Long id) {
+<span class="fc" id="L64">        EntityManager em = null;</span>
+
+        try {
+<span class="fc" id="L67">            em = JpaUtil.createEntityManager();</span>
+
+<span class="fc" id="L69">            Query query = em.createNativeQuery(</span>
+<span class="fc" id="L70">                    &quot;SELECT id, title, content, active_flag, target_role &quot; +</span>
+                    &quot;FROM notices WHERE id = :id&quot;
+            );
+
+<span class="fc" id="L74">            query.setParameter(&quot;id&quot;, id);</span>
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L77">            List&lt;Object[]&gt; rows = query.getResultList();</span>
+
+<span class="fc bfc" id="L79" title="All 2 branches covered.">            if (rows.isEmpty()) {</span>
+<span class="fc" id="L80">                return null;</span>
+            }
+
+<span class="fc" id="L83">            return convertRows(rows).get(0);</span>
+
+        } finally {
+<span class="pc bpc" id="L86" title="2 of 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="fc" id="L87">                em.close();</span>
+            }
+        }
+    }
+
+    public void insert(String title, String content, boolean active, String targetRole) {
+<span class="fc" id="L93">        EntityManager em = null;</span>
+
+        try {
+<span class="fc" id="L96">            em = JpaUtil.createEntityManager();</span>
+<span class="fc" id="L97">            em.getTransaction().begin();</span>
+
+<span class="fc" id="L99">            Query query = em.createNativeQuery(</span>
+<span class="fc" id="L100">                    &quot;INSERT INTO notices (title, content, active_flag, target_role) &quot; +</span>
+                    &quot;VALUES (:title, :content, :active, :targetRole)&quot;
+            );
+
+<span class="fc" id="L104">            query.setParameter(&quot;title&quot;, title);</span>
+<span class="fc" id="L105">            query.setParameter(&quot;content&quot;, content);</span>
+<span class="fc" id="L106">            query.setParameter(&quot;active&quot;, active);</span>
+<span class="fc" id="L107">            query.setParameter(&quot;targetRole&quot;, targetRole);</span>
+<span class="fc" id="L108">            query.executeUpdate();</span>
+
+<span class="fc" id="L110">            em.getTransaction().commit();</span>
+
+<span class="fc" id="L112">        } finally {</span>
+<span class="pc bpc" id="L113" title="2 of 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="fc" id="L114">                em.close();</span>
+            }
+        }
+<span class="fc" id="L117">    }</span>
+
+    public void update(Long id, String title, String content, boolean active, String targetRole) {
+<span class="fc" id="L120">        EntityManager em = null;</span>
+
+        try {
+<span class="fc" id="L123">            em = JpaUtil.createEntityManager();</span>
+<span class="fc" id="L124">            em.getTransaction().begin();</span>
+
+<span class="fc" id="L126">            Query query = em.createNativeQuery(</span>
+<span class="fc" id="L127">                    &quot;UPDATE notices &quot; +</span>
+                    &quot;SET title = :title, content = :content, active_flag = :active, target_role = :targetRole &quot; +
+                    &quot;WHERE id = :id&quot;
+            );
+
+<span class="fc" id="L132">            query.setParameter(&quot;title&quot;, title);</span>
+<span class="fc" id="L133">            query.setParameter(&quot;content&quot;, content);</span>
+<span class="fc" id="L134">            query.setParameter(&quot;active&quot;, active);</span>
+<span class="fc" id="L135">            query.setParameter(&quot;targetRole&quot;, targetRole);</span>
+<span class="fc" id="L136">            query.setParameter(&quot;id&quot;, id);</span>
+<span class="fc" id="L137">            query.executeUpdate();</span>
+
+<span class="fc" id="L139">            em.getTransaction().commit();</span>
+
+<span class="fc" id="L141">        } finally {</span>
+<span class="pc bpc" id="L142" title="2 of 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="fc" id="L143">                em.close();</span>
+            }
+        }
+<span class="fc" id="L146">    }</span>
+
+    public void toggle(Long id) {
+<span class="fc" id="L149">        Notice notice = findById(id);</span>
+
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if (notice == null) {</span>
+<span class="nc" id="L152">            return;</span>
+        }
+
+<span class="fc" id="L155">        EntityManager em = null;</span>
+
+        try {
+<span class="fc" id="L158">            em = JpaUtil.createEntityManager();</span>
+<span class="fc" id="L159">            em.getTransaction().begin();</span>
+
+<span class="fc" id="L161">            Query query = em.createNativeQuery(</span>
+<span class="fc" id="L162">                    &quot;UPDATE notices SET active_flag = :active WHERE id = :id&quot;</span>
+            );
+
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">            query.setParameter(&quot;active&quot;, !notice.isActive());</span>
+<span class="fc" id="L166">            query.setParameter(&quot;id&quot;, id);</span>
+<span class="fc" id="L167">            query.executeUpdate();</span>
+
+<span class="fc" id="L169">            em.getTransaction().commit();</span>
+
+<span class="fc" id="L171">        } finally {</span>
+<span class="pc bpc" id="L172" title="2 of 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="fc" id="L173">                em.close();</span>
+            }
+        }
+<span class="fc" id="L176">    }</span>
+
+    public void delete(Long id) {
+<span class="fc" id="L179">        EntityManager em = null;</span>
+
+        try {
+<span class="fc" id="L182">            em = JpaUtil.createEntityManager();</span>
+<span class="fc" id="L183">            em.getTransaction().begin();</span>
+
+<span class="fc" id="L185">            Query query = em.createNativeQuery(</span>
+<span class="fc" id="L186">                    &quot;DELETE FROM notices WHERE id = :id&quot;</span>
+            );
+
+<span class="fc" id="L189">            query.setParameter(&quot;id&quot;, id);</span>
+<span class="fc" id="L190">            query.executeUpdate();</span>
+
+<span class="fc" id="L192">            em.getTransaction().commit();</span>
+
+<span class="fc" id="L194">        } finally {</span>
+<span class="pc bpc" id="L195" title="2 of 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="fc" id="L196">                em.close();</span>
+            }
+        }
+<span class="fc" id="L199">    }</span>
+
+    private List&lt;Notice&gt; convertRows(List&lt;Object[]&gt; rows) {
+<span class="fc" id="L202">        List&lt;Notice&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        for (Object[] row : rows) {</span>
+<span class="fc" id="L205">            result.add(new Notice(</span>
+<span class="fc" id="L206">                    ((Number) row[0]).longValue(),</span>
+<span class="fc" id="L207">                    (String) row[1],</span>
+<span class="fc" id="L208">                    (String) row[2],</span>
+<span class="fc" id="L209">                    toBoolean(row[3]),</span>
+<span class="fc" id="L210">                    (String) row[4]</span>
+            ));
+        }
+
+<span class="fc" id="L214">        return result;</span>
+    }
+
+    private boolean toBoolean(Object value) {
+<span class="pc bpc" id="L218" title="1 of 2 branches missed.">        if (value instanceof Boolean) {</span>
+<span class="fc" id="L219">            return (Boolean) value;</span>
+        }
+
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        if (value instanceof Number) {</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">            return ((Number) value).intValue() == 1;</span>
+        }
+
+<span class="nc" id="L226">        return false;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

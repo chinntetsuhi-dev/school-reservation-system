@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ChatRoomDao.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.dao</a> &gt; <span class="el_source">ChatRoomDao.java</span></div><h1>ChatRoomDao.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.dao;
+
+import com.example.interviewsystem.model.ChatRoom;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.List;
+
+<span class="fc" id="L10">public class ChatRoomDao {</span>
+
+    public List&lt;ChatRoom&gt; findAll() {
+<span class="fc" id="L13">        EntityManager em = null;</span>
+
+        try {
+<span class="fc" id="L16">            em = JpaUtil.createEntityManager();</span>
+
+<span class="fc" id="L18">            Query query = em.createNativeQuery(</span>
+<span class="fc" id="L19">                    &quot;SELECT cr.id, cr.room_name, cr.parent_user_id, u.display_name, cr.status &quot; +</span>
+                    &quot;FROM chat_rooms cr &quot; +
+                    &quot;JOIN users u ON cr.parent_user_id = u.id &quot; +
+                    &quot;ORDER BY cr.id ASC&quot;
+            );
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L26">            List&lt;Object[]&gt; rows = query.getResultList();</span>
+
+<span class="fc" id="L28">            return convertRows(rows);</span>
+
+        } finally {
+<span class="pc bpc" id="L31" title="2 of 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="fc" id="L32">                em.close();</span>
+            }
+        }
+    }
+
+    public List&lt;ChatRoom&gt; findByParentUserId(Long parentUserId) {
+<span class="nc" id="L38">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L41">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L43">            Query query = em.createNativeQuery(</span>
+<span class="nc" id="L44">                    &quot;SELECT cr.id, cr.room_name, cr.parent_user_id, u.display_name, cr.status &quot; +</span>
+                    &quot;FROM chat_rooms cr &quot; +
+                    &quot;JOIN users u ON cr.parent_user_id = u.id &quot; +
+                    &quot;WHERE cr.parent_user_id = :parentUserId &quot; +
+                    &quot;ORDER BY cr.id ASC&quot;
+            );
+
+<span class="nc" id="L51">            query.setParameter(&quot;parentUserId&quot;, parentUserId);</span>
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L54">            List&lt;Object[]&gt; rows = query.getResultList();</span>
+
+<span class="nc" id="L56">            return convertRows(rows);</span>
+
+        } finally {
+<span class="nc bnc" id="L59" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L60">                em.close();</span>
+            }
+        }
+    }
+
+    public List&lt;ChatRoom&gt; findByChildUserId(Long childUserId) {
+<span class="nc" id="L66">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L69">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L71">            Query query = em.createNativeQuery(</span>
+<span class="nc" id="L72">                    &quot;SELECT cr.id, cr.room_name, cr.parent_user_id, p.display_name, cr.status &quot; +</span>
+                    &quot;FROM parent_children pc &quot; +
+                    &quot;JOIN chat_rooms cr ON pc.parent_user_id = cr.parent_user_id &quot; +
+                    &quot;JOIN users p ON cr.parent_user_id = p.id &quot; +
+                    &quot;WHERE pc.child_user_id = :childUserId &quot; +
+                    &quot;ORDER BY cr.id ASC&quot;
+            );
+
+<span class="nc" id="L80">            query.setParameter(&quot;childUserId&quot;, childUserId);</span>
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L83">            List&lt;Object[]&gt; rows = query.getResultList();</span>
+
+<span class="nc" id="L85">            return convertRows(rows);</span>
+
+        } finally {
+<span class="nc bnc" id="L88" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L89">                em.close();</span>
+            }
+        }
+    }
+
+    public ChatRoom findById(Long id) {
+<span class="fc" id="L95">        EntityManager em = null;</span>
+
+        try {
+<span class="fc" id="L98">            em = JpaUtil.createEntityManager();</span>
+
+<span class="fc" id="L100">            Query query = em.createNativeQuery(</span>
+<span class="fc" id="L101">                    &quot;SELECT cr.id, cr.room_name, cr.parent_user_id, u.display_name, cr.status &quot; +</span>
+                    &quot;FROM chat_rooms cr &quot; +
+                    &quot;JOIN users u ON cr.parent_user_id = u.id &quot; +
+                    &quot;WHERE cr.id = :id&quot;
+            );
+
+<span class="fc" id="L107">            query.setParameter(&quot;id&quot;, id);</span>
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L110">            List&lt;Object[]&gt; rows = query.getResultList();</span>
+
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">            if (rows.isEmpty()) {</span>
+<span class="fc" id="L113">                return null;</span>
+            }
+
+<span class="nc" id="L116">            return convertRows(rows).get(0);</span>
+
+        } finally {
+<span class="pc bpc" id="L119" title="2 of 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="fc" id="L120">                em.close();</span>
+            }
+        }
+    }
+
+    public boolean canAccessRoom(Long roomId, Long loginUserId, String role) {
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        if (&quot;TEACHER&quot;.equals(role)) {</span>
+<span class="fc" id="L127">            return true;</span>
+        }
+
+<span class="fc" id="L130">        ChatRoom room = findById(roomId);</span>
+
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">        if (room == null) {</span>
+<span class="fc" id="L133">            return false;</span>
+        }
+
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        if (&quot;PARENT&quot;.equals(role)) {</span>
+<span class="nc" id="L137">            return room.getParentUserId().equals(loginUserId);</span>
+        }
+
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (&quot;STUDENT&quot;.equals(role)) {</span>
+<span class="nc" id="L141">            List&lt;ChatRoom&gt; rooms = findByChildUserId(loginUserId);</span>
+
+<span class="nc bnc" id="L143" title="All 2 branches missed.">            for (ChatRoom r : rooms) {</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">                if (r.getId().equals(roomId)) {</span>
+<span class="nc" id="L145">                    return true;</span>
+                }
+            }
+        }
+
+<span class="nc" id="L150">        return false;</span>
+    }
+
+    private List&lt;ChatRoom&gt; convertRows(List&lt;Object[]&gt; rows) {
+<span class="fc" id="L154">        List&lt;ChatRoom&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        for (Object[] row : rows) {</span>
+<span class="fc" id="L157">            result.add(new ChatRoom(</span>
+<span class="fc" id="L158">                    ((Number) row[0]).longValue(),</span>
+<span class="fc" id="L159">                    (String) row[1],</span>
+<span class="fc" id="L160">                    ((Number) row[2]).longValue(),</span>
+<span class="fc" id="L161">                    (String) row[3],</span>
+<span class="fc" id="L162">                    (String) row[4]</span>
+            ));
+        }
+
+<span class="fc" id="L166">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

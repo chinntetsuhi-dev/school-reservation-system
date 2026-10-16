@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ChatBroadcaster.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.websocket</a> &gt; <span class="el_source">ChatBroadcaster.java</span></div><h1>ChatBroadcaster.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.websocket;
+
+import javax.websocket.OnClose;
+import javax.websocket.OnError;
+import javax.websocket.OnOpen;
+import javax.websocket.Session;
+import javax.websocket.server.PathParam;
+import javax.websocket.server.ServerEndpoint;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+@ServerEndpoint(&quot;/ws/chat/{roomId}&quot;)
+<span class="nc" id="L16">public class ChatBroadcaster {</span>
+
+<span class="nc" id="L18">    private static final ConcurrentHashMap&lt;Long, Set&lt;Session&gt;&gt; ROOM_SESSIONS =</span>
+<span class="nc" id="L19">            new ConcurrentHashMap&lt;Long, Set&lt;Session&gt;&gt;();</span>
+
+    @OnOpen
+    public void onOpen(
+            Session session,
+            @PathParam(&quot;roomId&quot;) String roomIdText) {
+
+<span class="nc" id="L26">        Long roomId = parseLong(roomIdText);</span>
+
+<span class="nc bnc" id="L28" title="All 2 branches missed.">        if (roomId == null) {</span>
+            try {
+<span class="nc" id="L30">                session.close();</span>
+<span class="nc" id="L31">            } catch (IOException e) {</span>
+                // 何もしない
+            }
+<span class="nc" id="L34">            return;</span>
+        }
+
+<span class="nc" id="L37">        session.getUserProperties().put(&quot;roomId&quot;, roomId);</span>
+
+<span class="nc" id="L39">        Set&lt;Session&gt; sessions =</span>
+<span class="nc" id="L40">                ROOM_SESSIONS.get(roomId);</span>
+
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        if (sessions == null) {</span>
+<span class="nc" id="L43">            sessions =</span>
+<span class="nc" id="L44">                    Collections.newSetFromMap(</span>
+<span class="nc" id="L45">                            new ConcurrentHashMap&lt;Session, Boolean&gt;()</span>
+                    );
+
+<span class="nc" id="L48">            Set&lt;Session&gt; existing =</span>
+<span class="nc" id="L49">                    ROOM_SESSIONS.putIfAbsent(roomId, sessions);</span>
+
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            if (existing != null) {</span>
+<span class="nc" id="L52">                sessions = existing;</span>
+            }
+        }
+
+<span class="nc" id="L56">        sessions.add(session);</span>
+<span class="nc" id="L57">    }</span>
+
+    @OnClose
+    public void onClose(Session session) {
+<span class="nc" id="L61">        removeSession(session);</span>
+<span class="nc" id="L62">    }</span>
+
+    @OnError
+    public void onError(
+            Session session,
+            Throwable throwable) {
+
+<span class="nc" id="L69">        removeSession(session);</span>
+<span class="nc" id="L70">    }</span>
+
+    public static void broadcastRoom(
+            Long roomId,
+            String message) {
+
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if (roomId == null) {</span>
+<span class="nc" id="L77">            return;</span>
+        }
+
+<span class="nc" id="L80">        Set&lt;Session&gt; sessions =</span>
+<span class="nc" id="L81">                ROOM_SESSIONS.get(roomId);</span>
+
+<span class="nc bnc" id="L83" title="All 4 branches missed.">        if (sessions == null || sessions.isEmpty()) {</span>
+<span class="nc" id="L84">            return;</span>
+        }
+
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        for (Session session : sessions) {</span>
+<span class="nc bnc" id="L88" title="All 4 branches missed.">            if (session != null &amp;&amp; session.isOpen()) {</span>
+                try {
+<span class="nc" id="L90">                    session.getBasicRemote().sendText(message);</span>
+<span class="nc" id="L91">                } catch (IOException e) {</span>
+<span class="nc" id="L92">                    removeSession(session);</span>
+                }
+            }
+        }
+<span class="nc" id="L96">    }</span>
+
+    private static void removeSession(Session session) {
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        if (session == null) {</span>
+<span class="nc" id="L100">            return;</span>
+        }
+
+<span class="nc" id="L103">        Object roomIdObject =</span>
+<span class="nc" id="L104">                session.getUserProperties().get(&quot;roomId&quot;);</span>
+
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (!(roomIdObject instanceof Long)) {</span>
+<span class="nc" id="L107">            return;</span>
+        }
+
+<span class="nc" id="L110">        Long roomId = (Long) roomIdObject;</span>
+
+<span class="nc" id="L112">        Set&lt;Session&gt; sessions =</span>
+<span class="nc" id="L113">                ROOM_SESSIONS.get(roomId);</span>
+
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        if (sessions != null) {</span>
+<span class="nc" id="L116">            sessions.remove(session);</span>
+
+<span class="nc bnc" id="L118" title="All 2 branches missed.">            if (sessions.isEmpty()) {</span>
+<span class="nc" id="L119">                ROOM_SESSIONS.remove(roomId);</span>
+            }
+        }
+<span class="nc" id="L122">    }</span>
+
+    private static Long parseLong(String value) {
+<span class="nc bnc" id="L125" title="All 4 branches missed.">        if (value == null || value.trim().isEmpty()) {</span>
+<span class="nc" id="L126">            return null;</span>
+        }
+
+        try {
+<span class="nc" id="L130">            return Long.valueOf(value);</span>
+<span class="nc" id="L131">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L132">            return null;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>FinalPlanDao.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.dao</a> &gt; <span class="el_source">FinalPlanDao.java</span></div><h1>FinalPlanDao.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.dao;
+
+import com.example.interviewsystem.model.FinalPlan;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.List;
+
+<span class="nc" id="L10">public class FinalPlanDao {</span>
+
+    public List&lt;FinalPlan&gt; findAll() {
+<span class="nc" id="L13">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L16">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L18">            Query query = em.createNativeQuery(</span>
+<span class="nc" id="L19">                    &quot;SELECT id, parent_request_id, selected_option_id, teacher_comment, response_status &quot; +</span>
+                    &quot;FROM final_plans ORDER BY id DESC&quot;
+            );
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L24">            List&lt;Object[]&gt; rows = query.getResultList();</span>
+
+<span class="nc" id="L26">            List&lt;FinalPlan&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L28" title="All 2 branches missed.">            for (Object[] row : rows) {</span>
+<span class="nc" id="L29">                result.add(convert(row));</span>
+            }
+
+<span class="nc" id="L32">            return result;</span>
+
+        } finally {
+<span class="nc bnc" id="L35" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L36">                em.close();</span>
+            }
+        }
+    }
+
+    public FinalPlan findByRequestId(Long requestId) {
+<span class="nc" id="L42">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L45">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L47">            Query query = em.createNativeQuery(</span>
+<span class="nc" id="L48">                    &quot;SELECT id, parent_request_id, selected_option_id, teacher_comment, response_status &quot; +</span>
+                    &quot;FROM final_plans WHERE parent_request_id = :requestId&quot;
+            );
+
+<span class="nc" id="L52">            query.setParameter(&quot;requestId&quot;, requestId);</span>
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L55">            List&lt;Object[]&gt; rows = query.getResultList();</span>
+
+<span class="nc bnc" id="L57" title="All 2 branches missed.">            if (rows.isEmpty()) {</span>
+<span class="nc" id="L58">                return null;</span>
+            }
+
+<span class="nc" id="L61">            return convert(rows.get(0));</span>
+
+        } finally {
+<span class="nc bnc" id="L64" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L65">                em.close();</span>
+            }
+        }
+    }
+
+    public void saveOrUpdate(Long requestId, Long selectedOptionId, String teacherComment) {
+<span class="nc" id="L71">        FinalPlan existing = findByRequestId(requestId);</span>
+
+<span class="nc" id="L73">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L76">            em = JpaUtil.createEntityManager();</span>
+<span class="nc" id="L77">            em.getTransaction().begin();</span>
+
+<span class="nc bnc" id="L79" title="All 2 branches missed.">            if (existing == null) {</span>
+<span class="nc" id="L80">                Query query = em.createNativeQuery(</span>
+<span class="nc" id="L81">                        &quot;INSERT INTO final_plans &quot; +</span>
+                        &quot;(parent_request_id, selected_option_id, teacher_comment, response_status) &quot; +
+                        &quot;VALUES (:requestId, :selectedOptionId, :teacherComment, 'WAITING_PARENT')&quot;
+                );
+
+<span class="nc" id="L86">                query.setParameter(&quot;requestId&quot;, requestId);</span>
+<span class="nc" id="L87">                query.setParameter(&quot;selectedOptionId&quot;, selectedOptionId);</span>
+<span class="nc" id="L88">                query.setParameter(&quot;teacherComment&quot;, teacherComment);</span>
+<span class="nc" id="L89">                query.executeUpdate();</span>
+
+<span class="nc" id="L91">            } else {</span>
+<span class="nc" id="L92">                Query query = em.createNativeQuery(</span>
+<span class="nc" id="L93">                        &quot;UPDATE final_plans &quot; +</span>
+                        &quot;SET selected_option_id = :selectedOptionId, &quot; +
+                        &quot;teacher_comment = :teacherComment, &quot; +
+                        &quot;response_status = 'WAITING_PARENT' &quot; +
+                        &quot;WHERE parent_request_id = :requestId&quot;
+                );
+
+<span class="nc" id="L100">                query.setParameter(&quot;selectedOptionId&quot;, selectedOptionId);</span>
+<span class="nc" id="L101">                query.setParameter(&quot;teacherComment&quot;, teacherComment);</span>
+<span class="nc" id="L102">                query.setParameter(&quot;requestId&quot;, requestId);</span>
+<span class="nc" id="L103">                query.executeUpdate();</span>
+            }
+
+<span class="nc" id="L106">            em.getTransaction().commit();</span>
+
+<span class="nc" id="L108">        } catch (RuntimeException e) {</span>
+<span class="nc bnc" id="L109" title="All 4 branches missed.">            if (em != null &amp;&amp; em.getTransaction().isActive()) {</span>
+<span class="nc" id="L110">                em.getTransaction().rollback();</span>
+            }
+<span class="nc" id="L112">            throw e;</span>
+
+        } finally {
+<span class="nc bnc" id="L115" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L116">                em.close();</span>
+            }
+        }
+<span class="nc" id="L119">    }</span>
+
+    public void updateResponseStatusByRequestId(Long requestId, String responseStatus) {
+<span class="nc" id="L122">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L125">            em = JpaUtil.createEntityManager();</span>
+<span class="nc" id="L126">            em.getTransaction().begin();</span>
+
+<span class="nc" id="L128">            Query query = em.createNativeQuery(</span>
+<span class="nc" id="L129">                    &quot;UPDATE final_plans &quot; +</span>
+                    &quot;SET response_status = :responseStatus &quot; +
+                    &quot;WHERE parent_request_id = :requestId&quot;
+            );
+
+<span class="nc" id="L134">            query.setParameter(&quot;responseStatus&quot;, responseStatus);</span>
+<span class="nc" id="L135">            query.setParameter(&quot;requestId&quot;, requestId);</span>
+<span class="nc" id="L136">            query.executeUpdate();</span>
+
+<span class="nc" id="L138">            em.getTransaction().commit();</span>
+
+<span class="nc" id="L140">        } catch (RuntimeException e) {</span>
+<span class="nc bnc" id="L141" title="All 4 branches missed.">            if (em != null &amp;&amp; em.getTransaction().isActive()) {</span>
+<span class="nc" id="L142">                em.getTransaction().rollback();</span>
+            }
+<span class="nc" id="L144">            throw e;</span>
+
+        } finally {
+<span class="nc bnc" id="L147" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L148">                em.close();</span>
+            }
+        }
+<span class="nc" id="L151">    }</span>
+
+    public void deleteByRequestId(Long requestId) {
+<span class="nc" id="L154">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L157">            em = JpaUtil.createEntityManager();</span>
+<span class="nc" id="L158">            em.getTransaction().begin();</span>
+
+<span class="nc" id="L160">            Query query = em.createNativeQuery(</span>
+<span class="nc" id="L161">                    &quot;DELETE FROM final_plans WHERE parent_request_id = :requestId&quot;</span>
+            );
+
+<span class="nc" id="L164">            query.setParameter(&quot;requestId&quot;, requestId);</span>
+<span class="nc" id="L165">            query.executeUpdate();</span>
+
+<span class="nc" id="L167">            em.getTransaction().commit();</span>
+
+<span class="nc" id="L169">        } catch (RuntimeException e) {</span>
+<span class="nc bnc" id="L170" title="All 4 branches missed.">            if (em != null &amp;&amp; em.getTransaction().isActive()) {</span>
+<span class="nc" id="L171">                em.getTransaction().rollback();</span>
+            }
+<span class="nc" id="L173">            throw e;</span>
+
+        } finally {
+<span class="nc bnc" id="L176" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L177">                em.close();</span>
+            }
+        }
+<span class="nc" id="L180">    }</span>
+
+    private FinalPlan convert(Object[] row) {
+<span class="nc" id="L183">        return new FinalPlan(</span>
+<span class="nc" id="L184">                ((Number) row[0]).longValue(),</span>
+<span class="nc" id="L185">                ((Number) row[1]).longValue(),</span>
+<span class="nc" id="L186">                ((Number) row[2]).longValue(),</span>
+<span class="nc" id="L187">                (String) row[3],</span>
+<span class="nc" id="L188">                (String) row[4]</span>
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

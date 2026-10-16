@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>FinalPlan.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.model</a> &gt; <span class="el_source">FinalPlan.java</span></div><h1>FinalPlan.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.model;
+
+public class FinalPlan {
+
+    private Long id;
+    private Long parentRequestId;
+    private Long selectedOptionId;
+    private String teacherComment;
+    private String responseStatus;
+
+<span class="nc" id="L11">    public FinalPlan() {</span>
+<span class="nc" id="L12">    }</span>
+
+<span class="nc" id="L14">    public FinalPlan(Long id, Long parentRequestId, Long selectedOptionId,</span>
+                     String teacherComment, String responseStatus) {
+<span class="nc" id="L16">        this.id = id;</span>
+<span class="nc" id="L17">        this.parentRequestId = parentRequestId;</span>
+<span class="nc" id="L18">        this.selectedOptionId = selectedOptionId;</span>
+<span class="nc" id="L19">        this.teacherComment = teacherComment;</span>
+<span class="nc" id="L20">        this.responseStatus = responseStatus;</span>
+<span class="nc" id="L21">    }</span>
+
+    public Long getId() {
+<span class="nc" id="L24">        return id;</span>
+    }
+
+    public Long getParentRequestId() {
+<span class="nc" id="L28">        return parentRequestId;</span>
+    }
+
+    public Long getSelectedOptionId() {
+<span class="nc" id="L32">        return selectedOptionId;</span>
+    }
+
+    public String getTeacherComment() {
+<span class="nc" id="L36">        return teacherComment;</span>
+    }
+
+    public String getResponseStatus() {
+<span class="nc" id="L40">        return responseStatus;</span>
+    }
+
+    public String getResponseStatusLabel() {
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (&quot;PARENT_CONFIRMING&quot;.equals(responseStatus)) {</span>
+<span class="nc" id="L45">            return &quot;保護者確認中&quot;;</span>
+        }
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        if (&quot;CONFIRMED&quot;.equals(responseStatus)) {</span>
+<span class="nc" id="L48">            return &quot;確定&quot;;</span>
+        }
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (&quot;RESUBMITTED&quot;.equals(responseStatus)) {</span>
+<span class="nc" id="L51">            return &quot;再提出&quot;;</span>
+        }
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (&quot;WAITING_PARENT&quot;.equals(responseStatus)) {</span>
+<span class="nc" id="L54">            return &quot;保護者確認待ち&quot;;</span>
+        }
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (&quot;CANCELLED&quot;.equals(responseStatus)) {</span>
+<span class="nc" id="L57">            return &quot;取消&quot;;</span>
+        }
+<span class="nc" id="L59">        return responseStatus;</span>
+    }
+
+    public boolean isConfirmed() {
+<span class="nc" id="L63">        return &quot;CONFIRMED&quot;.equals(responseStatus);</span>
+    }
+
+    public void setId(Long id) {
+<span class="nc" id="L67">        this.id = id;</span>
+<span class="nc" id="L68">    }</span>
+
+    public void setParentRequestId(Long parentRequestId) {
+<span class="nc" id="L71">        this.parentRequestId = parentRequestId;</span>
+<span class="nc" id="L72">    }</span>
+
+    public void setSelectedOptionId(Long selectedOptionId) {
+<span class="nc" id="L75">        this.selectedOptionId = selectedOptionId;</span>
+<span class="nc" id="L76">    }</span>
+
+    public void setTeacherComment(String teacherComment) {
+<span class="nc" id="L79">        this.teacherComment = teacherComment;</span>
+<span class="nc" id="L80">    }</span>
+
+    public void setResponseStatus(String responseStatus) {
+<span class="nc" id="L83">        this.responseStatus = responseStatus;</span>
+<span class="nc" id="L84">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

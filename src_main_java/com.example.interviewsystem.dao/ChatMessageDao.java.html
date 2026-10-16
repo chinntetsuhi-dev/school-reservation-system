@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ChatMessageDao.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.dao</a> &gt; <span class="el_source">ChatMessageDao.java</span></div><h1>ChatMessageDao.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.dao;
+
+import com.example.interviewsystem.model.ChatMessage;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.List;
+
+<span class="nc" id="L10">public class ChatMessageDao {</span>
+
+    public List&lt;ChatMessage&gt; findByRoomId(Long roomId) {
+<span class="nc" id="L13">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L16">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L18">            Query query = em.createNativeQuery(</span>
+<span class="nc" id="L19">                    &quot;SELECT cm.id, cm.room_id, u.display_name, cm.message, &quot; +</span>
+                    &quot;DATE_FORMAT(cm.sent_at, '%Y-%m-%d %H:%i:%s') &quot; +
+                    &quot;FROM chat_messages cm &quot; +
+                    &quot;JOIN users u ON cm.sender_user_id = u.id &quot; +
+                    &quot;WHERE cm.room_id = :roomId &quot; +
+                    &quot;ORDER BY cm.sent_at ASC&quot;
+            );
+
+<span class="nc" id="L27">            query.setParameter(&quot;roomId&quot;, roomId);</span>
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L30">            List&lt;Object[]&gt; rows = query.getResultList();</span>
+
+<span class="nc" id="L32">            List&lt;ChatMessage&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L34" title="All 2 branches missed.">            for (Object[] row : rows) {</span>
+<span class="nc" id="L35">                ChatMessage msg = new ChatMessage();</span>
+
+<span class="nc" id="L37">                msg.setId(((Number) row[0]).longValue());</span>
+<span class="nc" id="L38">                msg.setRoomId(((Number) row[1]).longValue());</span>
+<span class="nc" id="L39">                msg.setSenderName((String) row[2]);</span>
+<span class="nc" id="L40">                msg.setMessage((String) row[3]);</span>
+<span class="nc" id="L41">                msg.setSentAt((String) row[4]);</span>
+
+<span class="nc" id="L43">                result.add(msg);</span>
+            }
+
+<span class="nc" id="L46">            return result;</span>
+
+        } finally {
+<span class="nc bnc" id="L49" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L50">                em.close();</span>
+            }
+        }
+    }
+
+    public void insert(Long roomId, Long senderUserId, String message) {
+<span class="nc" id="L56">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L59">            em = JpaUtil.createEntityManager();</span>
+<span class="nc" id="L60">            em.getTransaction().begin();</span>
+
+<span class="nc" id="L62">            Query query = em.createNativeQuery(</span>
+<span class="nc" id="L63">                    &quot;INSERT INTO chat_messages (room_id, sender_user_id, message) &quot; +</span>
+                    &quot;VALUES (:roomId, :senderUserId, :message)&quot;
+            );
+
+<span class="nc" id="L67">            query.setParameter(&quot;roomId&quot;, roomId);</span>
+<span class="nc" id="L68">            query.setParameter(&quot;senderUserId&quot;, senderUserId);</span>
+<span class="nc" id="L69">            query.setParameter(&quot;message&quot;, message);</span>
+<span class="nc" id="L70">            query.executeUpdate();</span>
+
+<span class="nc" id="L72">            em.getTransaction().commit();</span>
+
+<span class="nc" id="L74">        } catch (RuntimeException e) {</span>
+<span class="nc bnc" id="L75" title="All 4 branches missed.">            if (em != null &amp;&amp; em.getTransaction().isActive()) {</span>
+<span class="nc" id="L76">                em.getTransaction().rollback();</span>
+            }
+<span class="nc" id="L78">            throw e;</span>
+
+        } finally {
+<span class="nc bnc" id="L81" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L82">                em.close();</span>
+            }
+        }
+<span class="nc" id="L85">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

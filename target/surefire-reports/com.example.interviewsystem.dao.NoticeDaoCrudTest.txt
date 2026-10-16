@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.example.interviewsystem.dao.NoticeDaoCrudTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.400 s -- in com.example.interviewsystem.dao.NoticeDaoCrudTest

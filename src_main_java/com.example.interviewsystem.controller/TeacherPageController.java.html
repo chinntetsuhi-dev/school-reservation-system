@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>TeacherPageController.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.controller</a> &gt; <span class="el_source">TeacherPageController.java</span></div><h1>TeacherPageController.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.controller;
+
+import com.example.interviewsystem.dao.FinalPlanDao;
+import com.example.interviewsystem.dao.NoticeDao;
+import com.example.interviewsystem.dao.ParentRequestDao;
+import com.example.interviewsystem.dao.ReservationDao;
+import com.example.interviewsystem.model.FinalPlan;
+import com.example.interviewsystem.model.ParentRequest;
+import com.example.interviewsystem.model.ReservationOption;
+import com.example.interviewsystem.model.ScheduleStatus;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Controller
+<span class="nc" id="L23">public class TeacherPageController {</span>
+
+<span class="nc" id="L25">    private final ReservationDao reservationDao =</span>
+<span class="nc" id="L26">            new ReservationDao();</span>
+
+<span class="nc" id="L28">    private final ParentRequestDao parentRequestDao =</span>
+<span class="nc" id="L29">            new ParentRequestDao();</span>
+
+<span class="nc" id="L31">    private final FinalPlanDao finalPlanDao =</span>
+<span class="nc" id="L32">            new FinalPlanDao();</span>
+
+<span class="nc" id="L34">    private final NoticeDao noticeDao =</span>
+<span class="nc" id="L35">            new NoticeDao();</span>
+
+    @GetMapping(&quot;/teacher/home&quot;)
+    public String teacherHome(Model model) {
+
+<span class="nc" id="L40">        model.addAttribute(</span>
+<span class="nc" id="L41">                &quot;notices&quot;,</span>
+<span class="nc" id="L42">                noticeDao.findAll()</span>
+        );
+
+<span class="nc" id="L45">        return &quot;teacher/home&quot;;</span>
+    }
+
+    @GetMapping(&quot;/teacher/notices/form&quot;)
+    public String noticeForm(
+            @RequestParam(
+                    value = &quot;id&quot;,
+                    required = false
+            )
+            Long id,
+            Model model) {
+
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (id != null) {</span>
+<span class="nc" id="L58">            model.addAttribute(</span>
+<span class="nc" id="L59">                    &quot;editingNotice&quot;,</span>
+<span class="nc" id="L60">                    noticeDao.findById(id)</span>
+            );
+
+<span class="nc" id="L63">        } else {</span>
+<span class="nc" id="L64">            model.addAttribute(</span>
+<span class="nc" id="L65">                    &quot;editingNotice&quot;,</span>
+<span class="nc" id="L66">                    null</span>
+            );
+        }
+
+<span class="nc" id="L70">        return &quot;teacher/notice-form&quot;;</span>
+    }
+
+    @PostMapping(&quot;/teacher/notices/create&quot;)
+    public String createNotice(
+            @RequestParam(&quot;title&quot;)
+            String title,
+            @RequestParam(&quot;content&quot;)
+            String content,
+            @RequestParam(&quot;targetRole&quot;)
+            String targetRole,
+            @RequestParam(
+                    value = &quot;active&quot;,
+                    required = false
+            )
+            String active) {
+
+<span class="nc" id="L87">        noticeDao.insert(</span>
+<span class="nc" id="L88">                title,</span>
+<span class="nc" id="L89">                content,</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">                active != null,</span>
+<span class="nc" id="L91">                targetRole</span>
+        );
+
+<span class="nc" id="L94">        return &quot;redirect:/teacher/home&quot;;</span>
+    }
+
+    @PostMapping(&quot;/teacher/notices/update&quot;)
+    public String updateNotice(
+            @RequestParam(&quot;id&quot;)
+            Long id,
+            @RequestParam(&quot;title&quot;)
+            String title,
+            @RequestParam(&quot;content&quot;)
+            String content,
+            @RequestParam(&quot;targetRole&quot;)
+            String targetRole,
+            @RequestParam(
+                    value = &quot;active&quot;,
+                    required = false
+            )
+            String active) {
+
+<span class="nc" id="L113">        noticeDao.update(</span>
+<span class="nc" id="L114">                id,</span>
+<span class="nc" id="L115">                title,</span>
+<span class="nc" id="L116">                content,</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">                active != null,</span>
+<span class="nc" id="L118">                targetRole</span>
+        );
+
+<span class="nc" id="L121">        return &quot;redirect:/teacher/home&quot;;</span>
+    }
+
+    @PostMapping(&quot;/teacher/notices/toggle&quot;)
+    public String toggleNotice(
+            @RequestParam(&quot;id&quot;)
+            Long id) {
+
+<span class="nc" id="L129">        noticeDao.toggle(id);</span>
+
+<span class="nc" id="L131">        return &quot;redirect:/teacher/home&quot;;</span>
+    }
+
+    @PostMapping(&quot;/teacher/notices/delete&quot;)
+    public String deleteNotice(
+            @RequestParam(&quot;id&quot;)
+            Long id) {
+
+<span class="nc" id="L139">        noticeDao.delete(id);</span>
+
+<span class="nc" id="L141">        return &quot;redirect:/teacher/home&quot;;</span>
+    }
+
+    @GetMapping(&quot;/teacher/notices&quot;)
+    public String noticeManagement() {
+<span class="nc" id="L146">        return &quot;redirect:/teacher/home&quot;;</span>
+    }
+
+    @GetMapping(&quot;/teacher/slots&quot;)
+    public String teacherSlots(
+            @RequestParam(
+                    value = &quot;saved&quot;,
+                    required = false
+            )
+            String saved,
+            Model model) {
+
+<span class="nc" id="L158">        List&lt;ReservationOption&gt; options =</span>
+<span class="nc" id="L159">                reservationDao.findAllOptions();</span>
+
+<span class="nc" id="L161">        Map&lt;String, ReservationOption&gt; optionMap =</span>
+<span class="nc" id="L162">                new HashMap&lt;&gt;();</span>
+
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        for (ReservationOption option : options) {</span>
+<span class="nc" id="L165">            optionMap.put(</span>
+<span class="nc" id="L166">                    option.getDate()</span>
+<span class="nc" id="L167">                            + &quot;_&quot;</span>
+<span class="nc" id="L168">                            + option.getTime(),</span>
+<span class="nc" id="L169">                    option</span>
+            );
+        }
+
+<span class="nc" id="L173">        model.addAttribute(</span>
+<span class="nc" id="L174">                &quot;dates&quot;,</span>
+<span class="nc" id="L175">                reservationDao.findFixedDates()</span>
+        );
+
+<span class="nc" id="L178">        model.addAttribute(</span>
+<span class="nc" id="L179">                &quot;times&quot;,</span>
+<span class="nc" id="L180">                reservationDao.findFixedTimes()</span>
+        );
+
+<span class="nc" id="L183">        model.addAttribute(</span>
+<span class="nc" id="L184">                &quot;optionMap&quot;,</span>
+<span class="nc" id="L185">                optionMap</span>
+        );
+
+<span class="nc" id="L188">        model.addAttribute(</span>
+<span class="nc" id="L189">                &quot;saved&quot;,</span>
+<span class="nc" id="L190">                &quot;1&quot;.equals(saved)</span>
+        );
+
+<span class="nc" id="L193">        return &quot;teacher/slots&quot;;</span>
+    }
+
+    @PostMapping(&quot;/teacher/slots/save&quot;)
+    public String saveTeacherSlots(
+            @RequestParam(
+                    value = &quot;availableOptionIds&quot;,
+                    required = false
+            )
+            List&lt;Long&gt; availableOptionIds) {
+
+<span class="nc" id="L204">        reservationDao.saveAvailableOptions(</span>
+<span class="nc" id="L205">                availableOptionIds</span>
+        );
+
+<span class="nc" id="L208">        return &quot;redirect:/teacher/slots?saved=1&quot;;</span>
+    }
+
+    @GetMapping(&quot;/teacher/schedule&quot;)
+    public String teacherSchedule(Model model) {
+
+<span class="nc" id="L214">        List&lt;ScheduleStatus&gt; scheduleList =</span>
+<span class="nc" id="L215">                reservationDao.findScheduleStatus(null);</span>
+
+<span class="nc" id="L217">        Map&lt;String, ScheduleStatus&gt; scheduleMap =</span>
+<span class="nc" id="L218">                new HashMap&lt;&gt;();</span>
+
+<span class="nc bnc" id="L220" title="All 2 branches missed.">        for (ScheduleStatus status : scheduleList) {</span>
+<span class="nc" id="L221">            scheduleMap.put(</span>
+<span class="nc" id="L222">                    status.getDate()</span>
+<span class="nc" id="L223">                            + &quot;_&quot;</span>
+<span class="nc" id="L224">                            + status.getTime(),</span>
+<span class="nc" id="L225">                    status</span>
+            );
+        }
+
+<span class="nc" id="L229">        model.addAttribute(</span>
+<span class="nc" id="L230">                &quot;dates&quot;,</span>
+<span class="nc" id="L231">                reservationDao.findFixedDates()</span>
+        );
+
+<span class="nc" id="L234">        model.addAttribute(</span>
+<span class="nc" id="L235">                &quot;times&quot;,</span>
+<span class="nc" id="L236">                reservationDao.findFixedTimes()</span>
+        );
+
+<span class="nc" id="L239">        model.addAttribute(</span>
+<span class="nc" id="L240">                &quot;scheduleMap&quot;,</span>
+<span class="nc" id="L241">                scheduleMap</span>
+        );
+
+<span class="nc" id="L244">        return &quot;teacher/schedule&quot;;</span>
+    }
+
+    @GetMapping(&quot;/teacher/reservations&quot;)
+    public String teacherReservations(Model model) {
+
+<span class="nc" id="L250">        model.addAttribute(</span>
+<span class="nc" id="L251">                &quot;finalPlans&quot;,</span>
+<span class="nc" id="L252">                finalPlanDao.findAll()</span>
+        );
+
+<span class="nc" id="L255">        model.addAttribute(</span>
+<span class="nc" id="L256">                &quot;parentRequests&quot;,</span>
+<span class="nc" id="L257">                parentRequestDao.findAll()</span>
+        );
+
+<span class="nc" id="L260">        model.addAttribute(</span>
+<span class="nc" id="L261">                &quot;reservationOptions&quot;,</span>
+<span class="nc" id="L262">                reservationDao.findAllOptions()</span>
+        );
+
+<span class="nc" id="L265">        return &quot;teacher/reservations&quot;;</span>
+    }
+
+    @GetMapping(&quot;/teacher/requests&quot;)
+    public String teacherRequests(
+            @RequestParam(
+                    value = &quot;optionId&quot;,
+                    required = false
+            )
+            Long optionId,
+            @RequestParam(
+                    value = &quot;error&quot;,
+                    required = false
+            )
+            String error,
+            Model model) {
+
+<span class="nc" id="L282">        model.addAttribute(</span>
+<span class="nc" id="L283">                &quot;parentRequests&quot;,</span>
+<span class="nc" id="L284">                parentRequestDao</span>
+<span class="nc" id="L285">                        .findUnfinishedForTeacher(</span>
+<span class="nc" id="L286">                                optionId</span>
+                        )
+        );
+
+<span class="nc" id="L290">        model.addAttribute(</span>
+<span class="nc" id="L291">                &quot;reservationOptions&quot;,</span>
+<span class="nc" id="L292">                reservationDao.findAllOptions()</span>
+        );
+
+<span class="nc" id="L295">        model.addAttribute(</span>
+<span class="nc" id="L296">                &quot;finalPlans&quot;,</span>
+<span class="nc" id="L297">                finalPlanDao.findAll()</span>
+        );
+
+<span class="nc" id="L300">        model.addAttribute(</span>
+<span class="nc" id="L301">                &quot;selectedOptionId&quot;,</span>
+<span class="nc" id="L302">                optionId</span>
+        );
+
+<span class="nc bnc" id="L305" title="All 2 branches missed.">        if (&quot;unavailable&quot;.equals(error)) {</span>
+<span class="nc" id="L306">            model.addAttribute(</span>
+<span class="nc" id="L307">                    &quot;errorMessage&quot;,</span>
+<span class="nc" id="L308">                    &quot;選択した時間はすでに使用されています。&quot;</span>
+                            + &quot;別の希望時間を選択してください。&quot;
+            );
+        }
+
+<span class="nc" id="L313">        return &quot;teacher/requests&quot;;</span>
+    }
+
+    @PostMapping(&quot;/teacher/confirm-request&quot;)
+    public String confirmRequest(
+            @RequestParam(&quot;requestId&quot;)
+            Long requestId,
+            @RequestParam(&quot;selectedOptionId&quot;)
+            Long selectedOptionId,
+            @RequestParam(
+                    value = &quot;teacherComment&quot;,
+                    required = false
+            )
+            String teacherComment) {
+
+<span class="nc" id="L328">        ParentRequest targetRequest =</span>
+<span class="nc" id="L329">                parentRequestDao.findById(requestId);</span>
+
+<span class="nc bnc" id="L331" title="All 2 branches missed.">        if (targetRequest == null) {</span>
+<span class="nc" id="L332">            return &quot;redirect:/teacher/requests&quot;;</span>
+        }
+
+<span class="nc" id="L335">        if (&quot;CONFIRMED&quot;.equals(</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">                targetRequest.getRequestStatus())) {</span>
+
+<span class="nc" id="L338">            return &quot;redirect:/teacher/requests&quot;;</span>
+        }
+
+<span class="nc" id="L341">        FinalPlan existingPlan =</span>
+<span class="nc" id="L342">                finalPlanDao.findByRequestId(requestId);</span>
+
+<span class="nc bnc" id="L344" title="All 2 branches missed.">        if (existingPlan != null) {</span>
+<span class="nc" id="L345">            reservationDao.updateAvailable(</span>
+<span class="nc" id="L346">                    existingPlan.getSelectedOptionId(),</span>
+<span class="nc" id="L347">                    true</span>
+            );
+        }
+
+<span class="nc" id="L351">        ReservationOption selectedOption =</span>
+<span class="nc" id="L352">                reservationDao.findOptionById(</span>
+<span class="nc" id="L353">                        selectedOptionId</span>
+                );
+
+<span class="nc bnc" id="L356" title="All 2 branches missed.">        if (selectedOption == null</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">                || !selectedOption.isAvailable()) {</span>
+
+<span class="nc" id="L359">            String suffix =</span>
+<span class="nc bnc" id="L360" title="All 2 branches missed.">                    targetRequest.getFirstOption() == null</span>
+<span class="nc" id="L361">                            ? &quot;&quot;</span>
+<span class="nc" id="L362">                            : &quot;?optionId=&quot;</span>
+<span class="nc" id="L363">                            + targetRequest</span>
+<span class="nc" id="L364">                            .getFirstOption()</span>
+<span class="nc" id="L365">                            .getId()</span>
+<span class="nc" id="L366">                            + &quot;&amp;error=unavailable&quot;;</span>
+
+<span class="nc" id="L368">            return &quot;redirect:/teacher/requests&quot;</span>
+<span class="nc" id="L369">                    + suffix;</span>
+        }
+
+<span class="nc" id="L372">        String nextStatus = &quot;WAITING_PARENT&quot;;</span>
+
+<span class="nc bnc" id="L374" title="All 2 branches missed.">        if (targetRequest.getFirstOption() != null</span>
+<span class="nc" id="L375">                &amp;&amp; targetRequest</span>
+<span class="nc" id="L376">                .getFirstOption()</span>
+<span class="nc" id="L377">                .getId()</span>
+<span class="nc bnc" id="L378" title="All 2 branches missed.">                .equals(selectedOptionId)) {</span>
+
+<span class="nc" id="L380">            nextStatus = &quot;CONFIRMED&quot;;</span>
+        }
+
+<span class="nc" id="L383">        finalPlanDao.saveOrUpdate(</span>
+<span class="nc" id="L384">                requestId,</span>
+<span class="nc" id="L385">                selectedOptionId,</span>
+<span class="nc" id="L386">                teacherComment</span>
+        );
+
+<span class="nc" id="L389">        finalPlanDao</span>
+<span class="nc" id="L390">                .updateResponseStatusByRequestId(</span>
+<span class="nc" id="L391">                        requestId,</span>
+<span class="nc" id="L392">                        nextStatus</span>
+                );
+
+<span class="nc" id="L395">        parentRequestDao.updateStatus(</span>
+<span class="nc" id="L396">                requestId,</span>
+<span class="nc" id="L397">                nextStatus</span>
+        );
+
+<span class="nc" id="L400">        reservationDao.updateAvailable(</span>
+<span class="nc" id="L401">                selectedOptionId,</span>
+<span class="nc" id="L402">                false</span>
+        );
+
+<span class="nc" id="L405">        return &quot;redirect:/teacher/schedule-build&quot;;</span>
+    }
+
+    @PostMapping(&quot;/teacher/cancel-reservation&quot;)
+    public String cancelReservation(
+            @RequestParam(&quot;requestId&quot;)
+            Long requestId) {
+
+<span class="nc" id="L413">        FinalPlan targetPlan =</span>
+<span class="nc" id="L414">                finalPlanDao.findByRequestId(requestId);</span>
+
+<span class="nc bnc" id="L416" title="All 2 branches missed.">        if (targetPlan != null) {</span>
+<span class="nc" id="L417">            reservationDao.updateAvailable(</span>
+<span class="nc" id="L418">                    targetPlan.getSelectedOptionId(),</span>
+<span class="nc" id="L419">                    true</span>
+            );
+
+<span class="nc" id="L422">            finalPlanDao.deleteByRequestId(</span>
+<span class="nc" id="L423">                    requestId</span>
+            );
+        }
+
+<span class="nc" id="L427">        parentRequestDao.updateStatus(</span>
+<span class="nc" id="L428">                requestId,</span>
+<span class="nc" id="L429">                &quot;SUBMITTED&quot;</span>
+        );
+
+<span class="nc" id="L432">        return &quot;redirect:/teacher/reservations&quot;;</span>
+    }
+
+    @GetMapping(&quot;/teacher/chatrooms&quot;)
+    public String teacherChatrooms() {
+<span class="nc" id="L437">        return &quot;redirect:/chat/rooms&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ParentController.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.controller</a> &gt; <span class="el_source">ParentController.java</span></div><h1>ParentController.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.controller;
+
+import com.example.interviewsystem.dao.FinalPlanDao;
+import com.example.interviewsystem.dao.ParentRequestDao;
+import com.example.interviewsystem.dao.ReservationDao;
+import com.example.interviewsystem.dao.UserDao;
+import com.example.interviewsystem.model.ChildInfo;
+import com.example.interviewsystem.model.ReservationOption;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpSession;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+@Controller
+<span class="nc" id="L26">public class ParentController {</span>
+
+<span class="nc" id="L28">    private final ReservationDao reservationDao =</span>
+<span class="nc" id="L29">            new ReservationDao();</span>
+
+<span class="nc" id="L31">    private final ParentRequestDao parentRequestDao =</span>
+<span class="nc" id="L32">            new ParentRequestDao();</span>
+
+<span class="nc" id="L34">    private final UserDao userDao =</span>
+<span class="nc" id="L35">            new UserDao();</span>
+
+<span class="nc" id="L37">    private final FinalPlanDao finalPlanDao =</span>
+<span class="nc" id="L38">            new FinalPlanDao();</span>
+
+    @GetMapping(&quot;/parent/reservation&quot;)
+    public String reservationPage(
+            HttpSession session,
+            @RequestParam(
+                    value = &quot;date&quot;,
+                    required = false
+            ) String date,
+            @RequestParam(
+                    value = &quot;error&quot;,
+                    required = false
+            ) String error,
+            Model model) {
+
+<span class="nc" id="L53">        Long parentUserId =</span>
+<span class="nc" id="L54">                (Long) session.getAttribute(&quot;loginUserId&quot;);</span>
+
+<span class="nc" id="L56">        String role =</span>
+<span class="nc" id="L57">                (String) session.getAttribute(&quot;loginRole&quot;);</span>
+
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        if (parentUserId == null</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                || !&quot;PARENT&quot;.equals(role)) {</span>
+
+<span class="nc" id="L62">            return &quot;redirect:/login&quot;;</span>
+        }
+
+<span class="nc" id="L65">        List&lt;ReservationOption&gt; options =</span>
+<span class="nc" id="L66">                reservationDao.findAllOptions();</span>
+
+<span class="nc" id="L68">        List&lt;ChildInfo&gt; children =</span>
+<span class="nc" id="L69">                userDao.findChildrenByParentId(parentUserId);</span>
+
+        List&lt;com.example.interviewsystem.model.ParentRequest&gt;
+<span class="nc" id="L72">                parentRequests =</span>
+<span class="nc" id="L73">                parentRequestDao.findByParentUserId(</span>
+<span class="nc" id="L74">                        parentUserId</span>
+                );
+
+<span class="nc" id="L77">        Set&lt;Long&gt; alreadySubmittedChildIds =</span>
+<span class="nc" id="L78">                new HashSet&lt;Long&gt;();</span>
+
+        for (com.example.interviewsystem.model.ParentRequest
+<span class="nc bnc" id="L81" title="All 2 branches missed.">                request : parentRequests) {</span>
+
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            if (request.getChildUserId() != null) {</span>
+<span class="nc" id="L84">                alreadySubmittedChildIds.add(</span>
+<span class="nc" id="L85">                        request.getChildUserId()</span>
+                );
+            }
+        }
+
+<span class="nc" id="L90">        List&lt;ChildInfo&gt; childrenToSubmit =</span>
+<span class="nc" id="L91">                new ArrayList&lt;ChildInfo&gt;();</span>
+
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        for (ChildInfo child : children) {</span>
+<span class="nc" id="L94">            if (!alreadySubmittedChildIds.contains(</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">                    child.getChildUserId())) {</span>
+
+<span class="nc" id="L97">                childrenToSubmit.add(child);</span>
+            }
+        }
+
+<span class="nc" id="L101">        Map&lt;String, ReservationOption&gt; optionMap =</span>
+<span class="nc" id="L102">                new HashMap&lt;String, ReservationOption&gt;();</span>
+
+<span class="nc" id="L104">        Set&lt;Long&gt; availableOptionIds =</span>
+<span class="nc" id="L105">                new HashSet&lt;Long&gt;();</span>
+
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        for (ReservationOption option : options) {</span>
+<span class="nc" id="L108">            optionMap.put(</span>
+<span class="nc" id="L109">                    option.getDate()</span>
+<span class="nc" id="L110">                            + &quot;_&quot;</span>
+<span class="nc" id="L111">                            + option.getTime(),</span>
+<span class="nc" id="L112">                    option</span>
+            );
+
+<span class="nc bnc" id="L115" title="All 2 branches missed.">            if (option.isAvailable()) {</span>
+<span class="nc" id="L116">                availableOptionIds.add(option.getId());</span>
+            }
+        }
+
+<span class="nc" id="L120">        model.addAttribute(&quot;options&quot;, options);</span>
+<span class="nc" id="L121">        model.addAttribute(&quot;children&quot;, children);</span>
+
+<span class="nc" id="L123">        model.addAttribute(</span>
+<span class="nc" id="L124">                &quot;childrenToSubmit&quot;,</span>
+<span class="nc" id="L125">                childrenToSubmit</span>
+        );
+
+<span class="nc" id="L128">        model.addAttribute(</span>
+<span class="nc" id="L129">                &quot;parentRequests&quot;,</span>
+<span class="nc" id="L130">                parentRequests</span>
+        );
+
+<span class="nc" id="L133">        model.addAttribute(</span>
+<span class="nc" id="L134">                &quot;dates&quot;,</span>
+<span class="nc" id="L135">                reservationDao.findFixedDates()</span>
+        );
+
+<span class="nc" id="L138">        model.addAttribute(</span>
+<span class="nc" id="L139">                &quot;times&quot;,</span>
+<span class="nc" id="L140">                reservationDao.findFixedTimes()</span>
+        );
+
+<span class="nc" id="L143">        model.addAttribute(&quot;optionMap&quot;, optionMap);</span>
+
+<span class="nc" id="L145">        model.addAttribute(</span>
+<span class="nc" id="L146">                &quot;availableOptionIds&quot;,</span>
+<span class="nc" id="L147">                availableOptionIds</span>
+        );
+
+<span class="nc" id="L150">        model.addAttribute(</span>
+<span class="nc" id="L151">                &quot;multipleChildren&quot;,</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">                childrenToSubmit.size() &gt; 1</span>
+        );
+
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        if (&quot;duplicate&quot;.equals(error)) {</span>
+<span class="nc" id="L156">            model.addAttribute(</span>
+<span class="nc" id="L157">                    &quot;errorMessage&quot;,</span>
+<span class="nc" id="L158">                    &quot;この児童はすでに希望を提出しています。&quot;</span>
+                            + &quot;処理が完了するまで再提出できません。&quot;
+            );
+
+<span class="nc bnc" id="L162" title="All 2 branches missed.">        } else if (&quot;invalid&quot;.equals(error)) {</span>
+<span class="nc" id="L163">            model.addAttribute(</span>
+<span class="nc" id="L164">                    &quot;errorMessage&quot;,</span>
+<span class="nc" id="L165">                    &quot;第1希望から第3希望まで、&quot;</span>
+                            + &quot;利用可能な異なる時間を選択してください。&quot;
+            );
+        }
+
+<span class="nc" id="L170">        return &quot;parent/reservation&quot;;</span>
+    }
+
+    @PostMapping(&quot;/parent/submit-requests&quot;)
+    public String submitRequests(
+            HttpSession session,
+            @RequestParam(&quot;childUserIds&quot;)
+            List&lt;Long&gt; childUserIds,
+            @RequestParam(&quot;firstOptionIds&quot;)
+            List&lt;Long&gt; firstOptionIds,
+            @RequestParam(&quot;secondOptionIds&quot;)
+            List&lt;Long&gt; secondOptionIds,
+            @RequestParam(&quot;thirdOptionIds&quot;)
+            List&lt;Long&gt; thirdOptionIds,
+            @RequestParam(
+                    value = &quot;comments&quot;,
+                    required = false
+            )
+            List&lt;String&gt; comments) {
+
+<span class="nc" id="L190">        Long parentUserId =</span>
+<span class="nc" id="L191">                (Long) session.getAttribute(&quot;loginUserId&quot;);</span>
+
+<span class="nc" id="L193">        String role =</span>
+<span class="nc" id="L194">                (String) session.getAttribute(&quot;loginRole&quot;);</span>
+
+<span class="nc bnc" id="L196" title="All 2 branches missed.">        if (parentUserId == null</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">                || !&quot;PARENT&quot;.equals(role)) {</span>
+
+<span class="nc" id="L199">            return &quot;redirect:/login&quot;;</span>
+        }
+
+<span class="nc" id="L202">        int size = childUserIds.size();</span>
+
+<span class="nc bnc" id="L204" title="All 2 branches missed.">        if (size == 0</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">                || firstOptionIds.size() != size</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">                || secondOptionIds.size() != size</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">                || thirdOptionIds.size() != size) {</span>
+
+<span class="nc" id="L209">            return &quot;redirect:/parent/reservation&quot;</span>
+                    + &quot;?error=invalid&quot;;
+        }
+
+<span class="nc" id="L213">        Map&lt;Long, ChildInfo&gt; ownChildren =</span>
+<span class="nc" id="L214">                new HashMap&lt;Long, ChildInfo&gt;();</span>
+
+<span class="nc bnc" id="L216" title="All 2 branches missed.">        for (ChildInfo child :</span>
+<span class="nc" id="L217">                userDao.findChildrenByParentId(</span>
+<span class="nc" id="L218">                        parentUserId)) {</span>
+
+<span class="nc" id="L220">            ownChildren.put(</span>
+<span class="nc" id="L221">                    child.getChildUserId(),</span>
+<span class="nc" id="L222">                    child</span>
+            );
+        }
+
+<span class="nc bnc" id="L226" title="All 2 branches missed.">        for (int i = 0; i &lt; size; i++) {</span>
+
+<span class="nc" id="L228">            Long childUserId =</span>
+<span class="nc" id="L229">                    childUserIds.get(i);</span>
+
+<span class="nc bnc" id="L231" title="All 2 branches missed.">            if (!ownChildren.containsKey(childUserId)</span>
+<span class="nc" id="L232">                    || parentRequestDao</span>
+<span class="nc" id="L233">                    .existsUnfinishedRequestByChildUserId(</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">                            childUserId)) {</span>
+
+<span class="nc" id="L236">                return &quot;redirect:/parent/reservation&quot;</span>
+                        + &quot;?error=duplicate&quot;;
+            }
+
+<span class="nc" id="L240">            List&lt;Long&gt; selectedIds =</span>
+<span class="nc" id="L241">                    new ArrayList&lt;Long&gt;();</span>
+
+<span class="nc" id="L243">            selectedIds.add(firstOptionIds.get(i));</span>
+<span class="nc" id="L244">            selectedIds.add(secondOptionIds.get(i));</span>
+<span class="nc" id="L245">            selectedIds.add(thirdOptionIds.get(i));</span>
+
+<span class="nc" id="L247">            if (!reservationDao.areAvailableOptions(</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">                    selectedIds)) {</span>
+
+<span class="nc" id="L250">                return &quot;redirect:/parent/reservation&quot;</span>
+                        + &quot;?error=invalid&quot;;
+            }
+        }
+
+<span class="nc bnc" id="L255" title="All 2 branches missed.">        for (int i = 0; i &lt; size; i++) {</span>
+
+<span class="nc" id="L257">            ChildInfo child =</span>
+<span class="nc" id="L258">                    ownChildren.get(</span>
+<span class="nc" id="L259">                            childUserIds.get(i)</span>
+                    );
+
+<span class="nc" id="L262">            String comment =</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">                    comments != null</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">                            &amp;&amp; comments.size() &gt; i</span>
+<span class="nc" id="L265">                            ? comments.get(i)</span>
+<span class="nc" id="L266">                            : null;</span>
+
+<span class="nc" id="L268">            parentRequestDao.insert(</span>
+<span class="nc" id="L269">                    parentUserId,</span>
+<span class="nc" id="L270">                    child.getChildUserId(),</span>
+<span class="nc" id="L271">                    child.getChildName(),</span>
+<span class="nc" id="L272">                    firstOptionIds.get(i),</span>
+<span class="nc" id="L273">                    secondOptionIds.get(i),</span>
+<span class="nc" id="L274">                    thirdOptionIds.get(i),</span>
+<span class="nc" id="L275">                    comment</span>
+            );
+        }
+
+<span class="nc" id="L279">        return &quot;redirect:/parent/reservation&quot;;</span>
+    }
+
+    /*
+     * 旧画面から送信された場合にも対応します。
+     */
+    @PostMapping(&quot;/parent/submit-request&quot;)
+    public String submitRequest(
+            HttpSession session,
+            @RequestParam(&quot;childUserId&quot;)
+            Long childUserId,
+            @RequestParam(&quot;firstOptionId&quot;)
+            Long firstOptionId,
+            @RequestParam(
+                    value = &quot;secondOptionId&quot;,
+                    required = false
+            )
+            Long secondOptionId,
+            @RequestParam(
+                    value = &quot;thirdOptionId&quot;,
+                    required = false
+            )
+            Long thirdOptionId,
+            @RequestParam(
+                    value = &quot;comment&quot;,
+                    required = false
+            )
+            String comment) {
+
+<span class="nc" id="L308">        Long parentUserId =</span>
+<span class="nc" id="L309">                (Long) session.getAttribute(&quot;loginUserId&quot;);</span>
+
+<span class="nc" id="L311">        String role =</span>
+<span class="nc" id="L312">                (String) session.getAttribute(&quot;loginRole&quot;);</span>
+
+<span class="nc bnc" id="L314" title="All 2 branches missed.">        if (parentUserId == null</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">                || !&quot;PARENT&quot;.equals(role)) {</span>
+
+<span class="nc" id="L317">            return &quot;redirect:/login&quot;;</span>
+        }
+
+<span class="nc" id="L320">        if (parentRequestDao</span>
+<span class="nc" id="L321">                .existsUnfinishedRequestByChildUserId(</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">                        childUserId)) {</span>
+
+<span class="nc" id="L324">            return &quot;redirect:/parent/reservation&quot;</span>
+                    + &quot;?error=duplicate&quot;;
+        }
+
+<span class="nc" id="L328">        List&lt;ChildInfo&gt; children =</span>
+<span class="nc" id="L329">                userDao.findChildrenByParentId(</span>
+<span class="nc" id="L330">                        parentUserId</span>
+                );
+
+<span class="nc" id="L333">        ChildInfo selectedChild = null;</span>
+
+<span class="nc bnc" id="L335" title="All 2 branches missed.">        for (ChildInfo child : children) {</span>
+<span class="nc" id="L336">            if (child.getChildUserId()</span>
+<span class="nc bnc" id="L337" title="All 2 branches missed.">                    .equals(childUserId)) {</span>
+
+<span class="nc" id="L339">                selectedChild = child;</span>
+<span class="nc" id="L340">                break;</span>
+            }
+        }
+
+<span class="nc bnc" id="L344" title="All 2 branches missed.">        if (selectedChild == null) {</span>
+<span class="nc" id="L345">            return &quot;redirect:/parent/reservation&quot;;</span>
+        }
+
+<span class="nc" id="L348">        List&lt;Long&gt; selectedIds =</span>
+<span class="nc" id="L349">                new ArrayList&lt;Long&gt;();</span>
+
+<span class="nc" id="L351">        selectedIds.add(firstOptionId);</span>
+<span class="nc" id="L352">        selectedIds.add(secondOptionId);</span>
+<span class="nc" id="L353">        selectedIds.add(thirdOptionId);</span>
+
+<span class="nc" id="L355">        if (!reservationDao.areAvailableOptions(</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">                selectedIds)) {</span>
+
+<span class="nc" id="L358">            return &quot;redirect:/parent/reservation&quot;</span>
+                    + &quot;?error=invalid&quot;;
+        }
+
+<span class="nc" id="L362">        parentRequestDao.insert(</span>
+<span class="nc" id="L363">                parentUserId,</span>
+<span class="nc" id="L364">                childUserId,</span>
+<span class="nc" id="L365">                selectedChild.getChildName(),</span>
+<span class="nc" id="L366">                firstOptionId,</span>
+<span class="nc" id="L367">                secondOptionId,</span>
+<span class="nc" id="L368">                thirdOptionId,</span>
+<span class="nc" id="L369">                comment</span>
+        );
+
+<span class="nc" id="L372">        return &quot;redirect:/parent/reservation&quot;;</span>
+    }
+
+    @PostMapping(&quot;/parent/confirm-reservation&quot;)
+    public String confirmReservation(
+            HttpSession session,
+            @RequestParam(&quot;requestId&quot;)
+            Long requestId) {
+
+<span class="nc" id="L381">        Long parentUserId =</span>
+<span class="nc" id="L382">                (Long) session.getAttribute(&quot;loginUserId&quot;);</span>
+
+<span class="nc" id="L384">        String role =</span>
+<span class="nc" id="L385">                (String) session.getAttribute(&quot;loginRole&quot;);</span>
+
+<span class="nc bnc" id="L387" title="All 2 branches missed.">        if (parentUserId == null</span>
+<span class="nc bnc" id="L388" title="All 2 branches missed.">                || !&quot;PARENT&quot;.equals(role)) {</span>
+
+<span class="nc" id="L390">            return &quot;redirect:/login&quot;;</span>
+        }
+
+<span class="nc" id="L393">        parentRequestDao.updateStatus(</span>
+<span class="nc" id="L394">                requestId,</span>
+<span class="nc" id="L395">                &quot;CONFIRMED&quot;</span>
+        );
+
+<span class="nc" id="L398">        finalPlanDao</span>
+<span class="nc" id="L399">                .updateResponseStatusByRequestId(</span>
+<span class="nc" id="L400">                        requestId,</span>
+<span class="nc" id="L401">                        &quot;CONFIRMED&quot;</span>
+                );
+
+<span class="nc" id="L404">        return &quot;redirect:/parent/reservation&quot;;</span>
+    }
+
+    @GetMapping(&quot;/parent/reservation-info&quot;)
+    public String reservationInfo() {
+<span class="nc" id="L409">        return &quot;redirect:/parent/reservation&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

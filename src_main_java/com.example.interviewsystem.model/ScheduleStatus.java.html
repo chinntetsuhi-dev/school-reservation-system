@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ScheduleStatus.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.model</a> &gt; <span class="el_source">ScheduleStatus.java</span></div><h1>ScheduleStatus.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.model;
+
+public class ScheduleStatus {
+
+    private Long optionId;
+    private String date;
+    private String time;
+    private boolean available;
+    private String planStatus;
+    private String parentName;
+    private String childName;
+
+<span class="nc" id="L13">    public ScheduleStatus() {</span>
+<span class="nc" id="L14">    }</span>
+
+    public Long getOptionId() {
+<span class="nc" id="L17">        return optionId;</span>
+    }
+
+    public String getDate() {
+<span class="nc" id="L21">        return date;</span>
+    }
+
+    public String getTime() {
+<span class="nc" id="L25">        return time;</span>
+    }
+
+    public boolean isAvailable() {
+<span class="nc" id="L29">        return available;</span>
+    }
+
+    public String getPlanStatus() {
+<span class="nc" id="L33">        return planStatus;</span>
+    }
+
+    public String getParentName() {
+<span class="nc" id="L37">        return parentName;</span>
+    }
+
+    public String getChildName() {
+<span class="nc" id="L41">        return childName;</span>
+    }
+
+    public String getStatusLabel() {
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (&quot;CONFIRMED&quot;.equals(planStatus)) {</span>
+<span class="nc" id="L46">            return &quot;予約済み&quot;;</span>
+        }
+
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (&quot;PARENT_CONFIRMING&quot;.equals(planStatus)</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">                || &quot;WAITING_PARENT&quot;.equals(planStatus)) {</span>
+
+<span class="nc" id="L52">            return &quot;確認待ち&quot;;</span>
+        }
+
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        if (available) {</span>
+<span class="nc" id="L56">            return &quot;利用可能&quot;;</span>
+        }
+
+<span class="nc" id="L59">        return &quot;非公開&quot;;</span>
+    }
+
+    public boolean isConfirmed() {
+<span class="nc" id="L63">        return &quot;CONFIRMED&quot;.equals(planStatus);</span>
+    }
+
+    public String getDisplayName() {
+<span class="nc bnc" id="L67" title="All 4 branches missed.">        if (isConfirmed() &amp;&amp; childName != null) {</span>
+<span class="nc" id="L68">            return childName;</span>
+        }
+
+<span class="nc" id="L71">        return &quot;&quot;;</span>
+    }
+
+    public String getStatusClass() {
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        if (&quot;CONFIRMED&quot;.equals(planStatus)) {</span>
+<span class="nc" id="L76">            return &quot;status-confirmed&quot;;</span>
+        }
+
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if (&quot;PARENT_CONFIRMING&quot;.equals(planStatus)</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">                || &quot;WAITING_PARENT&quot;.equals(planStatus)) {</span>
+
+<span class="nc" id="L82">            return &quot;status-parent-confirming&quot;;</span>
+        }
+
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (available) {</span>
+<span class="nc" id="L86">            return &quot;status-submitted&quot;;</span>
+        }
+
+<span class="nc" id="L89">        return &quot;status-resubmitted&quot;;</span>
+    }
+
+    public void setOptionId(Long optionId) {
+<span class="nc" id="L93">        this.optionId = optionId;</span>
+<span class="nc" id="L94">    }</span>
+
+    public void setDate(String date) {
+<span class="nc" id="L97">        this.date = date;</span>
+<span class="nc" id="L98">    }</span>
+
+    public void setTime(String time) {
+<span class="nc" id="L101">        this.time = time;</span>
+<span class="nc" id="L102">    }</span>
+
+    public void setAvailable(boolean available) {
+<span class="nc" id="L105">        this.available = available;</span>
+<span class="nc" id="L106">    }</span>
+
+    public void setPlanStatus(String planStatus) {
+<span class="nc" id="L109">        this.planStatus = planStatus;</span>
+<span class="nc" id="L110">    }</span>
+
+    public void setParentName(String parentName) {
+<span class="nc" id="L113">        this.parentName = parentName;</span>
+<span class="nc" id="L114">    }</span>
+
+    public void setChildName(String childName) {
+<span class="nc" id="L117">        this.childName = childName;</span>
+<span class="nc" id="L118">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ParentPageController.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.controller</a> &gt; <span class="el_source">ParentPageController.java</span></div><h1>ParentPageController.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.controller;
+
+import com.example.interviewsystem.dao.FinalPlanDao;
+import com.example.interviewsystem.dao.NoticeDao;
+import com.example.interviewsystem.dao.ParentRequestDao;
+import com.example.interviewsystem.dao.ReservationDao;
+import com.example.interviewsystem.dao.UserDao;
+import com.example.interviewsystem.model.ChildInfo;
+import com.example.interviewsystem.model.FinalPlan;
+import com.example.interviewsystem.model.ParentRequest;
+import com.example.interviewsystem.model.ReservationOption;
+import com.example.interviewsystem.model.ScheduleStatus;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+import javax.servlet.http.HttpSession;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Controller
+<span class="nc" id="L24">public class ParentPageController {</span>
+
+<span class="nc" id="L26">    private final NoticeDao noticeDao =</span>
+<span class="nc" id="L27">            new NoticeDao();</span>
+
+<span class="nc" id="L29">    private final ReservationDao reservationDao =</span>
+<span class="nc" id="L30">            new ReservationDao();</span>
+
+<span class="nc" id="L32">    private final ParentRequestDao parentRequestDao =</span>
+<span class="nc" id="L33">            new ParentRequestDao();</span>
+
+<span class="nc" id="L35">    private final FinalPlanDao finalPlanDao =</span>
+<span class="nc" id="L36">            new FinalPlanDao();</span>
+
+<span class="nc" id="L38">    private final UserDao userDao =</span>
+<span class="nc" id="L39">            new UserDao();</span>
+
+    @GetMapping(&quot;/parent/home&quot;)
+    public String parentHome(Model model) {
+
+<span class="nc" id="L44">        model.addAttribute(</span>
+<span class="nc" id="L45">                &quot;notices&quot;,</span>
+<span class="nc" id="L46">                noticeDao.findActiveForRole(&quot;PARENT&quot;)</span>
+        );
+
+<span class="nc" id="L49">        return &quot;parent/home&quot;;</span>
+    }
+
+    @GetMapping(&quot;/parent/schedule&quot;)
+    public String parentSchedule(
+            HttpSession session,
+            Model model) {
+
+<span class="nc" id="L57">        Long parentUserId =</span>
+<span class="nc" id="L58">                (Long) session.getAttribute(&quot;loginUserId&quot;);</span>
+
+<span class="nc" id="L60">        String role =</span>
+<span class="nc" id="L61">                (String) session.getAttribute(&quot;loginRole&quot;);</span>
+
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (parentUserId == null</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">                || !&quot;PARENT&quot;.equals(role)) {</span>
+
+<span class="nc" id="L66">            return &quot;redirect:/login&quot;;</span>
+        }
+
+<span class="nc" id="L69">        List&lt;ScheduleStatus&gt; scheduleList =</span>
+<span class="nc" id="L70">                reservationDao.findScheduleStatus(null);</span>
+
+<span class="nc" id="L72">        Map&lt;String, ScheduleStatus&gt; scheduleMap =</span>
+<span class="nc" id="L73">                new HashMap&lt;&gt;();</span>
+
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        for (ScheduleStatus status : scheduleList) {</span>
+<span class="nc" id="L76">            scheduleMap.put(</span>
+<span class="nc" id="L77">                    status.getDate()</span>
+<span class="nc" id="L78">                            + &quot;_&quot;</span>
+<span class="nc" id="L79">                            + status.getTime(),</span>
+<span class="nc" id="L80">                    status</span>
+            );
+        }
+
+<span class="nc" id="L84">        List&lt;ChildInfo&gt; children =</span>
+<span class="nc" id="L85">                userDao.findChildrenByParentId(</span>
+<span class="nc" id="L86">                        parentUserId</span>
+                );
+
+        Map&lt;Long, ReservationOption&gt;
+<span class="nc" id="L90">                confirmedOptionsByChildId =</span>
+<span class="nc" id="L91">                new HashMap&lt;&gt;();</span>
+
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        for (ParentRequest request :</span>
+<span class="nc" id="L94">                parentRequestDao.findByParentUserId(</span>
+<span class="nc" id="L95">                        parentUserId)) {</span>
+
+<span class="nc" id="L97">            FinalPlan plan =</span>
+<span class="nc" id="L98">                    finalPlanDao.findByRequestId(</span>
+<span class="nc" id="L99">                            request.getId()</span>
+                    );
+
+<span class="nc bnc" id="L102" title="All 2 branches missed.">            if (plan != null</span>
+<span class="nc" id="L103">                    &amp;&amp; &quot;CONFIRMED&quot;.equals(</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">                    plan.getResponseStatus())) {</span>
+
+<span class="nc" id="L106">                confirmedOptionsByChildId.put(</span>
+<span class="nc" id="L107">                        request.getChildUserId(),</span>
+<span class="nc" id="L108">                        reservationDao.findOptionById(</span>
+<span class="nc" id="L109">                                plan.getSelectedOptionId()</span>
+                        )
+                );
+            }
+        }
+
+<span class="nc" id="L115">        model.addAttribute(</span>
+<span class="nc" id="L116">                &quot;dates&quot;,</span>
+<span class="nc" id="L117">                reservationDao.findFixedDates()</span>
+        );
+
+<span class="nc" id="L120">        model.addAttribute(</span>
+<span class="nc" id="L121">                &quot;times&quot;,</span>
+<span class="nc" id="L122">                reservationDao.findFixedTimes()</span>
+        );
+
+<span class="nc" id="L125">        model.addAttribute(</span>
+<span class="nc" id="L126">                &quot;scheduleMap&quot;,</span>
+<span class="nc" id="L127">                scheduleMap</span>
+        );
+
+<span class="nc" id="L130">        model.addAttribute(&quot;children&quot;, children);</span>
+
+<span class="nc" id="L132">        model.addAttribute(</span>
+<span class="nc" id="L133">                &quot;confirmedOptionsByChildId&quot;,</span>
+<span class="nc" id="L134">                confirmedOptionsByChildId</span>
+        );
+
+<span class="nc" id="L137">        return &quot;parent/schedule&quot;;</span>
+    }
+
+    @GetMapping(&quot;/parent/chat&quot;)
+    public String parentChat() {
+<span class="nc" id="L142">        return &quot;redirect:/chat/rooms&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

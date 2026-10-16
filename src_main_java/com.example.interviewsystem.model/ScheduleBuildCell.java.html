@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ScheduleBuildCell.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.model</a> &gt; <span class="el_source">ScheduleBuildCell.java</span></div><h1>ScheduleBuildCell.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.model;
+
+<span class="fc" id="L3">public class ScheduleBuildCell {</span>
+
+    private Long optionId;
+    private String date;
+    private String time;
+    private String status;
+    private String label;
+    private String childName;
+    private String parentName;
+    private int manualCount;
+
+    public Long getOptionId() {
+<span class="nc" id="L15">        return optionId;</span>
+    }
+
+    public String getDate() {
+<span class="nc" id="L19">        return date;</span>
+    }
+
+    public String getTime() {
+<span class="nc" id="L23">        return time;</span>
+    }
+
+    public String getStatus() {
+<span class="nc" id="L27">        return status;</span>
+    }
+
+    public String getLabel() {
+<span class="nc" id="L31">        return label;</span>
+    }
+
+    public String getChildName() {
+<span class="nc" id="L35">        return childName;</span>
+    }
+
+    public String getParentName() {
+<span class="nc" id="L39">        return parentName;</span>
+    }
+
+    public int getManualCount() {
+<span class="nc" id="L43">        return manualCount;</span>
+    }
+
+    public String getCssClass() {
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        if (&quot;AUTO_CONFIRMED&quot;.equals(status)) {</span>
+<span class="nc" id="L48">            return &quot;cell-auto&quot;;</span>
+        }
+
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (&quot;SIBLING_AUTO_CONFIRMED&quot;.equals(status)) {</span>
+<span class="nc" id="L52">            return &quot;cell-sibling&quot;;</span>
+        }
+
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        if (&quot;WAITING_PARENT&quot;.equals(status)) {</span>
+<span class="nc" id="L56">            return &quot;cell-waiting&quot;;</span>
+        }
+
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        if (&quot;CONFIRMED&quot;.equals(status)) {</span>
+<span class="nc" id="L60">            return &quot;cell-published&quot;;</span>
+        }
+
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (&quot;MANUAL_REQUIRED&quot;.equals(status)) {</span>
+<span class="nc" id="L64">            return &quot;cell-manual&quot;;</span>
+        }
+
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        if (&quot;CLOSED&quot;.equals(status)) {</span>
+<span class="nc" id="L68">            return &quot;cell-closed&quot;;</span>
+        }
+
+<span class="nc" id="L71">        return &quot;cell-open&quot;;</span>
+    }
+
+    public void setOptionId(Long optionId) {
+<span class="fc" id="L75">        this.optionId = optionId;</span>
+<span class="fc" id="L76">    }</span>
+
+    public void setDate(String date) {
+<span class="fc" id="L79">        this.date = date;</span>
+<span class="fc" id="L80">    }</span>
+
+    public void setTime(String time) {
+<span class="fc" id="L83">        this.time = time;</span>
+<span class="fc" id="L84">    }</span>
+
+    public void setStatus(String status) {
+<span class="fc" id="L87">        this.status = status;</span>
+<span class="fc" id="L88">    }</span>
+
+    public void setLabel(String label) {
+<span class="fc" id="L91">        this.label = label;</span>
+<span class="fc" id="L92">    }</span>
+
+    public void setChildName(String childName) {
+<span class="fc" id="L95">        this.childName = childName;</span>
+<span class="fc" id="L96">    }</span>
+
+    public void setParentName(String parentName) {
+<span class="fc" id="L99">        this.parentName = parentName;</span>
+<span class="fc" id="L100">    }</span>
+
+    public void setManualCount(int manualCount) {
+<span class="fc" id="L103">        this.manualCount = manualCount;</span>
+<span class="fc" id="L104">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

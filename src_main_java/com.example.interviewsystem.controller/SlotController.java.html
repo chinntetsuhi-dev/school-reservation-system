@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>SlotController.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.controller</a> &gt; <span class="el_source">SlotController.java</span></div><h1>SlotController.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.controller;
+
+import com.example.interviewsystem.model.InterviewSlot;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+<span class="nc" id="L12">public class SlotController {</span>
+
+<span class="nc" id="L14">    public static final List&lt;InterviewSlot&gt; slots = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L15">    public static String finalSlot = null;</span>
+
+    @PostMapping(&quot;/teacher/add-slot&quot;)
+    public String addSlot(@RequestParam(&quot;date&quot;) String date,
+                          @RequestParam(&quot;time&quot;) String time) {
+
+<span class="nc" id="L21">        Long newId = (long) (slots.size() + 1);</span>
+<span class="nc" id="L22">        slots.add(new InterviewSlot(newId, date, time, false));</span>
+
+<span class="nc" id="L24">        return &quot;redirect:/teacher/reservations&quot;;</span>
+    }
+
+    @PostMapping(&quot;/teacher/select-final-slot&quot;)
+    public String selectFinalSlot(@RequestParam(&quot;finalSlot&quot;) String slot) {
+<span class="nc" id="L29">        finalSlot = slot;</span>
+<span class="nc" id="L30">        return &quot;redirect:/teacher/reservations&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

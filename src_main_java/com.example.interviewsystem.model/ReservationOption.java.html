@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ReservationOption.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.model</a> &gt; <span class="el_source">ReservationOption.java</span></div><h1>ReservationOption.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.model;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
+public class ReservationOption {
+
+    private Long id;
+    private String date;
+    private String time;
+    private boolean available;
+
+<span class="fc" id="L14">    public ReservationOption() {</span>
+<span class="fc" id="L15">    }</span>
+
+<span class="nc" id="L17">    public ReservationOption(</span>
+            Long id,
+            String date,
+            String time,
+            boolean available) {
+
+<span class="nc" id="L23">        this.id = id;</span>
+<span class="nc" id="L24">        this.date = date;</span>
+<span class="nc" id="L25">        this.time = time;</span>
+<span class="nc" id="L26">        this.available = available;</span>
+<span class="nc" id="L27">    }</span>
+
+    public Long getId() {
+<span class="nc" id="L30">        return id;</span>
+    }
+
+    public String getDate() {
+<span class="fc" id="L34">        return date;</span>
+    }
+
+    public String getTime() {
+<span class="nc" id="L38">        return time;</span>
+    }
+
+    public boolean isAvailable() {
+<span class="fc" id="L42">        return available;</span>
+    }
+
+    public boolean getAvailable() {
+<span class="nc" id="L46">        return available;</span>
+    }
+
+    public String getStatusLabel() {
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        return available ? &quot;利用可能&quot; : &quot;利用不可&quot;;</span>
+    }
+
+    public String getDisplayDate() {
+<span class="nc bnc" id="L54" title="All 4 branches missed.">        if (date == null || date.trim().isEmpty()) {</span>
+<span class="nc" id="L55">            return &quot;&quot;;</span>
+        }
+
+<span class="nc" id="L58">        LocalDate localDate = LocalDate.parse(date);</span>
+
+<span class="nc" id="L60">        DateTimeFormatter formatter =</span>
+<span class="nc" id="L61">                DateTimeFormatter.ofPattern(</span>
+<span class="nc" id="L62">                        &quot;M/d（E）&quot;,</span>
+<span class="nc" id="L63">                        Locale.JAPANESE</span>
+                );
+
+<span class="nc" id="L66">        return localDate.format(formatter);</span>
+    }
+
+    public String getDisplayTime() {
+<span class="nc bnc" id="L70" title="All 4 branches missed.">        if (time == null || time.trim().isEmpty()) {</span>
+<span class="nc" id="L71">            return &quot;&quot;;</span>
+        }
+
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        return time.endsWith(&quot;〜&quot;)</span>
+<span class="nc" id="L75">                ? time</span>
+<span class="nc" id="L76">                : time + &quot;〜&quot;;</span>
+    }
+
+    public String getDisplayLabel() {
+<span class="nc" id="L80">        String displayDate = getDisplayDate();</span>
+<span class="nc" id="L81">        String displayTime = getDisplayTime();</span>
+
+<span class="nc bnc" id="L83" title="All 4 branches missed.">        if (displayDate.isEmpty() &amp;&amp; displayTime.isEmpty()) {</span>
+<span class="nc" id="L84">            return &quot;&quot;;</span>
+        }
+
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (displayDate.isEmpty()) {</span>
+<span class="nc" id="L88">            return displayTime;</span>
+        }
+
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        if (displayTime.isEmpty()) {</span>
+<span class="nc" id="L92">            return displayDate;</span>
+        }
+
+<span class="nc" id="L95">        return displayDate + &quot; &quot; + displayTime;</span>
+    }
+
+    /*
+     * 旧画面との互換性を残すためのメソッドです。
+     * 今回の固定時間表では施設情報を使用しません。
+     */
+    public String getFacilityName() {
+<span class="nc" id="L103">        return &quot;&quot;;</span>
+    }
+
+    public Long getFacilityId() {
+<span class="nc" id="L107">        return null;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L111">        this.id = id;</span>
+<span class="fc" id="L112">    }</span>
+
+    public void setDate(String date) {
+<span class="fc" id="L115">        this.date = date;</span>
+<span class="fc" id="L116">    }</span>
+
+    public void setTime(String time) {
+<span class="fc" id="L119">        this.time = time;</span>
+<span class="fc" id="L120">    }</span>
+
+    public void setAvailable(boolean available) {
+<span class="fc" id="L123">        this.available = available;</span>
+<span class="fc" id="L124">    }</span>
+
+    public void setFacilityName(String facilityName) {
+        // 今回は使用しません
+<span class="nc" id="L128">    }</span>
+
+    public void setFacilityId(Long facilityId) {
+        // 今回は使用しません
+<span class="nc" id="L132">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

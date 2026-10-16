@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>UserDaoTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.dao</a> &gt; <span class="el_source">UserDaoTest.java</span></div><h1>UserDaoTest.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.dao;
+
+import com.example.interviewsystem.model.User;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+<span class="fc" id="L9">public class UserDaoTest {</span>
+
+    @Test
+    public void testFindByLoginIdAndPasswordTeacher() {
+<span class="fc" id="L13">        UserDao dao = new UserDao();</span>
+
+<span class="fc" id="L15">        User user = dao.findByLoginIdAndPassword(&quot;T1&quot;, &quot;1234&quot;);</span>
+
+<span class="fc" id="L17">        assertNotNull(user);</span>
+<span class="fc" id="L18">        assertEquals(&quot;T1&quot;, user.getLoginId());</span>
+<span class="fc" id="L19">        assertTrue(&quot;TEACHER&quot;.equalsIgnoreCase(user.getRole()));</span>
+<span class="fc" id="L20">    }</span>
+
+    @Test
+    public void testFindByLoginIdAndPasswordNotFound() {
+<span class="fc" id="L24">        UserDao dao = new UserDao();</span>
+
+<span class="fc" id="L26">        User user = dao.findByLoginIdAndPassword(&quot;NOT_EXIST_USER&quot;, &quot;wrong&quot;);</span>
+
+<span class="fc" id="L28">        assertNull(user);</span>
+<span class="fc" id="L29">    }</span>
+
+    @Test
+    public void testFindByIdNotFound() {
+<span class="fc" id="L33">        UserDao dao = new UserDao();</span>
+
+<span class="fc" id="L35">        User user = dao.findById(-99999L);</span>
+
+<span class="fc" id="L37">        assertNull(user);</span>
+<span class="fc" id="L38">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

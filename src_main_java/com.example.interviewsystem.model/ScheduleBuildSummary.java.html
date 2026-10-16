@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ScheduleBuildSummary.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.model</a> &gt; <span class="el_source">ScheduleBuildSummary.java</span></div><h1>ScheduleBuildSummary.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.model;
+
+public class ScheduleBuildSummary {
+
+    private int totalParentCount;
+    private int submittedParentCount;
+    private int notSubmittedParentCount;
+
+<span class="nc" id="L9">    public ScheduleBuildSummary() {</span>
+<span class="nc" id="L10">    }</span>
+
+<span class="fc" id="L12">    public ScheduleBuildSummary(int totalParentCount, int submittedParentCount) {</span>
+<span class="fc" id="L13">        this.totalParentCount = totalParentCount;</span>
+<span class="fc" id="L14">        this.submittedParentCount = submittedParentCount;</span>
+<span class="fc" id="L15">        this.notSubmittedParentCount = totalParentCount - submittedParentCount;</span>
+<span class="fc" id="L16">    }</span>
+
+    public int getTotalParentCount() {
+<span class="nc" id="L19">        return totalParentCount;</span>
+    }
+
+    public int getSubmittedParentCount() {
+<span class="nc" id="L23">        return submittedParentCount;</span>
+    }
+
+    public int getNotSubmittedParentCount() {
+<span class="nc" id="L27">        return notSubmittedParentCount;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

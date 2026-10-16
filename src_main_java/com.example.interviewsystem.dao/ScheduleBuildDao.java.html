@@ -1,0 +1,687 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>ScheduleBuildDao.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.dao</a> &gt; <span class="el_source">ScheduleBuildDao.java</span></div><h1>ScheduleBuildDao.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.dao;
+
+import com.example.interviewsystem.model.ParentRequest;
+import com.example.interviewsystem.model.ScheduleBuildCell;
+import com.example.interviewsystem.model.ScheduleBuildSummary;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
+import java.util.ArrayList;
+import java.util.List;
+
+<span class="fc" id="L13">public class ScheduleBuildDao {</span>
+
+    public List&lt;ParentRequest&gt; findSubmissionRows() {
+
+<span class="nc" id="L17">        return new ParentRequestDao()</span>
+<span class="nc" id="L18">                .findSubmissionRows();</span>
+    }
+
+    public ScheduleBuildSummary getSummary() {
+
+<span class="fc" id="L23">        EntityManager em = null;</span>
+
+        try {
+<span class="fc" id="L26">            em = JpaUtil.createEntityManager();</span>
+
+<span class="fc" id="L28">            Query totalQuery =</span>
+<span class="fc" id="L29">                    em.createNativeQuery(</span>
+<span class="fc" id="L30">                            &quot;SELECT COUNT(*) &quot;</span>
+                                    + &quot;FROM users &quot;
+                                    + &quot;WHERE role = 'STUDENT'&quot;
+                    );
+
+<span class="fc" id="L35">            Query submittedQuery =</span>
+<span class="fc" id="L36">                    em.createNativeQuery(</span>
+<span class="fc" id="L37">                            &quot;SELECT COUNT(&quot;</span>
+                                    + &quot;DISTINCT child_user_id) &quot;
+                                    + &quot;FROM parent_requests&quot;
+                    );
+
+<span class="fc" id="L42">            int total =</span>
+<span class="fc" id="L43">                    ((Number) totalQuery</span>
+<span class="fc" id="L44">                            .getSingleResult())</span>
+<span class="fc" id="L45">                            .intValue();</span>
+
+<span class="fc" id="L47">            int submitted =</span>
+<span class="fc" id="L48">                    ((Number) submittedQuery</span>
+<span class="fc" id="L49">                            .getSingleResult())</span>
+<span class="fc" id="L50">                            .intValue();</span>
+
+<span class="fc" id="L52">            return new ScheduleBuildSummary(</span>
+<span class="fc" id="L53">                    total,</span>
+<span class="fc" id="L54">                    submitted</span>
+            );
+
+        } finally {
+
+<span class="pc bpc" id="L59" title="2 of 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="fc" id="L60">                em.close();</span>
+            }
+        }
+    }
+
+    public List&lt;String&gt; findDates() {
+
+<span class="fc" id="L67">        return new ArrayList&lt;&gt;(</span>
+<span class="fc" id="L68">                ReservationDao.FIXED_DATES</span>
+        );
+    }
+
+    public List&lt;String&gt; findTimes() {
+
+<span class="fc" id="L74">        return new ArrayList&lt;&gt;(</span>
+<span class="fc" id="L75">                ReservationDao.FIXED_TIMES</span>
+        );
+    }
+
+    public int countManualRequired() {
+
+<span class="fc" id="L81">        EntityManager em = null;</span>
+
+        try {
+<span class="fc" id="L84">            em = JpaUtil.createEntityManager();</span>
+
+<span class="fc" id="L86">            Query query =</span>
+<span class="fc" id="L87">                    em.createNativeQuery(</span>
+<span class="fc" id="L88">                            &quot;SELECT COUNT(*) &quot;</span>
+                                    + &quot;FROM parent_requests pr &quot;
+                                    + &quot;LEFT JOIN final_plans fp &quot;
+                                    + &quot;ON pr.id &quot;
+                                    + &quot;= fp.parent_request_id &quot;
+                                    + &quot;WHERE pr.request_status &quot;
+                                    + &quot;= 'MANUAL_REQUIRED' &quot;
+                                    + &quot;AND fp.id IS NULL&quot;
+                    );
+
+<span class="fc" id="L98">            Number count =</span>
+<span class="fc" id="L99">                    (Number) query.getSingleResult();</span>
+
+<span class="fc" id="L101">            return count.intValue();</span>
+
+        } finally {
+
+<span class="pc bpc" id="L105" title="2 of 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="fc" id="L106">                em.close();</span>
+            }
+        }
+    }
+
+    public List&lt;ScheduleBuildCell&gt; findCells() {
+
+<span class="fc" id="L113">        EntityManager em = null;</span>
+
+        try {
+<span class="fc" id="L116">            em = JpaUtil.createEntityManager();</span>
+
+<span class="fc" id="L118">            Query query =</span>
+<span class="fc" id="L119">                    em.createNativeQuery(</span>
+<span class="fc" id="L120">                            &quot;SELECT ro.id, &quot;</span>
+                                    + &quot;DATE_FORMAT(&quot;
+                                    + &quot;ro.option_date, '%Y-%m-%d'), &quot;
+                                    + &quot;ro.option_time, &quot;
+                                    + &quot;ro.available_flag, &quot;
+                                    + &quot;fp.response_status, &quot;
+                                    + &quot;u.display_name, &quot;
+                                    + &quot;pr.child_name, &quot;
+                                    + &quot;(&quot;
+                                    + &quot; SELECT COUNT(*) &quot;
+                                    + &quot; FROM parent_request_options pro2 &quot;
+                                    + &quot; JOIN parent_requests pr2 &quot;
+                                    + &quot; ON pro2.parent_request_id = pr2.id &quot;
+                                    + &quot; LEFT JOIN final_plans fp2 &quot;
+                                    + &quot; ON pr2.id = fp2.parent_request_id &quot;
+                                    + &quot; JOIN reservation_options ro2 &quot;
+                                    + &quot; ON pro2.reservation_option_id &quot;
+                                    + &quot;= ro2.id &quot;
+                                    + &quot; WHERE &quot;
+                                    + &quot;pro2.reservation_option_id = ro.id &quot;
+                                    + &quot; AND pro2.priority = 1 &quot;
+                                    + &quot; AND pr2.request_status &quot;
+                                    + &quot;= 'MANUAL_REQUIRED' &quot;
+                                    + &quot; AND fp2.id IS NULL &quot;
+                                    + &quot;) AS manual_count &quot;
+                                    + &quot;FROM reservation_options ro &quot;
+                                    + &quot;LEFT JOIN final_plans fp &quot;
+                                    + &quot;ON ro.id = fp.selected_option_id &quot;
+                                    + &quot;LEFT JOIN parent_requests pr &quot;
+                                    + &quot;ON fp.parent_request_id = pr.id &quot;
+                                    + &quot;LEFT JOIN users u &quot;
+                                    + &quot;ON pr.parent_user_id = u.id &quot;
+                                    + &quot;WHERE ro.option_date BETWEEN &quot;
+                                    + &quot;'2026-07-06' &quot;
+                                    + &quot;AND '2026-07-10' &quot;
+                                    + &quot;ORDER BY &quot;
+                                    + &quot;ro.option_date ASC, &quot;
+                                    + &quot;FIELD(ro.option_time, &quot;
+                                    + &quot;'12:20',&quot;
+                                    + &quot;'13:00',&quot;
+                                    + &quot;'14:20',&quot;
+                                    + &quot;'15:00',&quot;
+                                    + &quot;'15:40',&quot;
+                                    + &quot;'16:20',&quot;
+                                    + &quot;'17:00',&quot;
+                                    + &quot;'17:40')&quot;
+                    );
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L169">            List&lt;Object[]&gt; rows =</span>
+<span class="fc" id="L170">                    query.getResultList();</span>
+
+<span class="fc" id="L172">            List&lt;ScheduleBuildCell&gt; result =</span>
+<span class="fc" id="L173">                    new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L175" title="All 2 branches covered.">            for (Object[] row : rows) {</span>
+
+<span class="fc" id="L177">                ScheduleBuildCell cell =</span>
+<span class="fc" id="L178">                        new ScheduleBuildCell();</span>
+
+<span class="fc" id="L180">                Long optionId =</span>
+<span class="fc" id="L181">                        ((Number) row[0])</span>
+<span class="fc" id="L182">                                .longValue();</span>
+
+<span class="fc" id="L184">                String date =</span>
+<span class="fc" id="L185">                        (String) row[1];</span>
+
+<span class="fc" id="L187">                String time =</span>
+<span class="fc" id="L188">                        (String) row[2];</span>
+
+<span class="fc" id="L190">                boolean available =</span>
+<span class="fc" id="L191">                        toBoolean(row[3]);</span>
+
+<span class="fc" id="L193">                String responseStatus =</span>
+<span class="fc" id="L194">                        (String) row[4];</span>
+
+<span class="fc" id="L196">                String parentName =</span>
+<span class="fc" id="L197">                        (String) row[5];</span>
+
+<span class="fc" id="L199">                String childName =</span>
+<span class="fc" id="L200">                        (String) row[6];</span>
+
+<span class="fc" id="L202">                int manualCount =</span>
+<span class="fc" id="L203">                        ((Number) row[7])</span>
+<span class="fc" id="L204">                                .intValue();</span>
+
+<span class="fc" id="L206">                cell.setOptionId(optionId);</span>
+<span class="fc" id="L207">                cell.setDate(date);</span>
+<span class="fc" id="L208">                cell.setTime(time);</span>
+
+<span class="fc" id="L210">                cell.setParentName(</span>
+<span class="fc" id="L211">                        parentName</span>
+                );
+
+<span class="fc" id="L214">                cell.setChildName(</span>
+<span class="fc" id="L215">                        childName</span>
+                );
+
+<span class="fc" id="L218">                cell.setManualCount(</span>
+<span class="fc" id="L219">                        manualCount</span>
+                );
+
+<span class="fc" id="L222">                if (&quot;WAITING_PARENT&quot;.equals(</span>
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">                        responseStatus)</span>
+<span class="fc" id="L224">                        || &quot;PARENT_CONFIRMING&quot;.equals(</span>
+<span class="pc bpc" id="L225" title="1 of 2 branches missed.">                        responseStatus)) {</span>
+
+<span class="nc" id="L227">                    cell.setStatus(</span>
+<span class="nc" id="L228">                            &quot;WAITING_PARENT&quot;</span>
+                    );
+
+<span class="nc" id="L231">                    cell.setLabel(</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">                            childName != null</span>
+<span class="nc" id="L233">                                    ? childName</span>
+<span class="nc" id="L234">                                    : &quot;保護者確認待ち&quot;</span>
+                    );
+
+<span class="nc" id="L237">                } else if (</span>
+<span class="fc" id="L238">                        &quot;SIBLING_AUTO_CONFIRMED&quot;</span>
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">                                .equals(responseStatus)) {</span>
+
+<span class="nc" id="L241">                    cell.setStatus(</span>
+<span class="nc" id="L242">                            &quot;SIBLING_AUTO_CONFIRMED&quot;</span>
+                    );
+
+<span class="nc" id="L245">                    cell.setLabel(</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">                            childName != null</span>
+<span class="nc" id="L247">                                    ? childName</span>
+<span class="nc" id="L248">                                    : &quot;兄弟連立&quot;</span>
+                    );
+
+<span class="nc" id="L251">                } else if (</span>
+<span class="fc" id="L252">                        &quot;AUTO_CONFIRMED&quot;</span>
+<span class="pc bpc" id="L253" title="1 of 2 branches missed.">                                .equals(responseStatus)) {</span>
+
+<span class="nc" id="L255">                    cell.setStatus(</span>
+<span class="nc" id="L256">                            &quot;AUTO_CONFIRMED&quot;</span>
+                    );
+
+<span class="nc" id="L259">                    cell.setLabel(</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">                            childName != null</span>
+<span class="nc" id="L261">                                    ? childName</span>
+<span class="nc" id="L262">                                    : &quot;第1希望確定&quot;</span>
+                    );
+
+<span class="pc" id="L265">                } else if (&quot;CONFIRMED&quot;.equals(</span>
+<span class="pc bpc" id="L266" title="1 of 2 branches missed.">                        responseStatus)) {</span>
+
+<span class="nc" id="L268">                    cell.setStatus(&quot;CONFIRMED&quot;);</span>
+
+<span class="nc" id="L270">                    cell.setLabel(</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">                            childName != null</span>
+<span class="nc" id="L272">                                    ? childName</span>
+<span class="nc" id="L273">                                    : &quot;確定済み&quot;</span>
+                    );
+
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">                } else if (manualCount &gt; 0) {</span>
+
+<span class="nc" id="L278">                    cell.setStatus(</span>
+<span class="nc" id="L279">                            &quot;MANUAL_REQUIRED&quot;</span>
+                    );
+
+<span class="nc" id="L282">                    cell.setLabel(</span>
+<span class="nc" id="L283">                            &quot;手動確認必要（&quot;</span>
+<span class="nc" id="L284">                                    + manualCount</span>
+<span class="nc" id="L285">                                    + &quot;名）&quot;</span>
+                    );
+
+<span class="pc bpc" id="L288" title="1 of 2 branches missed.">                } else if (!available) {</span>
+
+<span class="nc" id="L290">                    cell.setStatus(&quot;CLOSED&quot;);</span>
+<span class="nc" id="L291">                    cell.setLabel(&quot;非公開&quot;);</span>
+
+<span class="nc" id="L293">                } else {</span>
+
+<span class="fc" id="L295">                    cell.setStatus(&quot;OPEN&quot;);</span>
+<span class="fc" id="L296">                    cell.setLabel(&quot;空き&quot;);</span>
+                }
+
+<span class="fc" id="L299">                result.add(cell);</span>
+            }
+
+<span class="fc" id="L302">            return result;</span>
+
+        } finally {
+
+<span class="pc bpc" id="L306" title="2 of 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="fc" id="L307">                em.close();</span>
+            }
+        }
+    }
+
+    /*
+     * 自动分配处理：
+     *
+     * 1. 只检查第一希望是否冲突。
+     * 2. 第一希望相同的所有申请都标记为
+     *    MANUAL_REQUIRED。
+     * 3. 冲突双方都不会自动分配。
+     * 4. 其余申请按照希望顺序寻找可用时间。
+     */
+    public int executeAutoAssign() {
+
+<span class="nc" id="L323">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L326">            em = JpaUtil.createEntityManager();</span>
+<span class="nc" id="L327">            em.getTransaction().begin();</span>
+
+<span class="nc" id="L329">            Query conflictQuery =</span>
+<span class="nc" id="L330">                    em.createNativeQuery(</span>
+<span class="nc" id="L331">                            &quot;SELECT DISTINCT pr.id &quot;</span>
+                                    + &quot;FROM parent_requests pr &quot;
+                                    + &quot;JOIN parent_request_options pro &quot;
+                                    + &quot;ON pr.id &quot;
+                                    + &quot;= pro.parent_request_id &quot;
+                                    + &quot;LEFT JOIN final_plans fp &quot;
+                                    + &quot;ON pr.id &quot;
+                                    + &quot;= fp.parent_request_id &quot;
+                                    + &quot;WHERE pr.request_status &quot;
+                                    + &quot;= 'SUBMITTED' &quot;
+                                    + &quot;AND fp.id IS NULL &quot;
+                                    + &quot;AND pro.priority = 1 &quot;
+                                    + &quot;AND &quot;
+                                    + &quot;pro.reservation_option_id IN (&quot;
+                                    + &quot;SELECT &quot;
+                                    + &quot;pro2.reservation_option_id &quot;
+                                    + &quot;FROM &quot;
+                                    + &quot;parent_request_options pro2 &quot;
+                                    + &quot;JOIN parent_requests pr2 &quot;
+                                    + &quot;ON &quot;
+                                    + &quot;pro2.parent_request_id &quot;
+                                    + &quot;= pr2.id &quot;
+                                    + &quot;LEFT JOIN final_plans fp2 &quot;
+                                    + &quot;ON pr2.id &quot;
+                                    + &quot;= fp2.parent_request_id &quot;
+                                    + &quot;WHERE pro2.priority = 1 &quot;
+                                    + &quot;AND pr2.request_status &quot;
+                                    + &quot;= 'SUBMITTED' &quot;
+                                    + &quot;AND fp2.id IS NULL &quot;
+                                    + &quot;GROUP BY &quot;
+                                    + &quot;pro2.reservation_option_id &quot;
+                                    + &quot;HAVING COUNT(*) &gt; 1&quot;
+                                    + &quot;)&quot;
+                    );
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L367">            List&lt;Number&gt; conflictRequestIds =</span>
+<span class="nc" id="L368">                    conflictQuery.getResultList();</span>
+
+<span class="nc bnc" id="L370" title="All 2 branches missed.">            for (Number conflictRequestId :</span>
+<span class="nc" id="L371">                    conflictRequestIds) {</span>
+
+<span class="nc" id="L373">                Query markManual =</span>
+<span class="nc" id="L374">                        em.createNativeQuery(</span>
+<span class="nc" id="L375">                                &quot;UPDATE parent_requests &quot;</span>
+                                        + &quot;SET request_status &quot;
+                                        + &quot;= 'MANUAL_REQUIRED' &quot;
+                                        + &quot;WHERE id = :requestId&quot;
+                        );
+
+<span class="nc" id="L381">                markManual.setParameter(</span>
+<span class="nc" id="L382">                        &quot;requestId&quot;,</span>
+<span class="nc" id="L383">                        conflictRequestId.longValue()</span>
+                );
+
+<span class="nc" id="L386">                markManual.executeUpdate();</span>
+            }
+
+            /*
+             * 上面的冲突处理后，仍然是SUBMITTED的申请だけ
+             * 会进入自动分配。
+             */
+<span class="nc" id="L393">            Query requestQuery =</span>
+<span class="nc" id="L394">                    em.createNativeQuery(</span>
+<span class="nc" id="L395">                            &quot;SELECT pr.id, &quot;</span>
+                                    + &quot;pc.has_sibling_flag &quot;
+                                    + &quot;FROM parent_requests pr &quot;
+                                    + &quot;LEFT JOIN parent_children pc &quot;
+                                    + &quot;ON pr.parent_user_id &quot;
+                                    + &quot;= pc.parent_user_id &quot;
+                                    + &quot;AND pr.child_user_id &quot;
+                                    + &quot;= pc.child_user_id &quot;
+                                    + &quot;LEFT JOIN final_plans fp &quot;
+                                    + &quot;ON pr.id &quot;
+                                    + &quot;= fp.parent_request_id &quot;
+                                    + &quot;WHERE pr.request_status &quot;
+                                    + &quot;= 'SUBMITTED' &quot;
+                                    + &quot;AND fp.id IS NULL &quot;
+                                    + &quot;ORDER BY pr.created_at ASC&quot;
+                    );
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L413">            List&lt;Object[]&gt; requests =</span>
+<span class="nc" id="L414">                    requestQuery.getResultList();</span>
+
+<span class="nc" id="L416">            int count = 0;</span>
+
+<span class="nc bnc" id="L418" title="All 2 branches missed.">            for (Object[] requestRow : requests) {</span>
+
+<span class="nc" id="L420">                Long requestId =</span>
+<span class="nc" id="L421">                        ((Number) requestRow[0])</span>
+<span class="nc" id="L422">                                .longValue();</span>
+
+<span class="nc" id="L424">                boolean hasSibling =</span>
+<span class="nc" id="L425">                        toBoolean(requestRow[1]);</span>
+
+<span class="nc" id="L427">                ChoiceResult choice =</span>
+<span class="nc" id="L428">                        findBestAssignableChoice(</span>
+<span class="nc" id="L429">                                em,</span>
+<span class="nc" id="L430">                                requestId</span>
+                        );
+
+<span class="nc bnc" id="L433" title="All 2 branches missed.">                if (choice == null) {</span>
+<span class="nc" id="L434">                    continue;</span>
+                }
+
+                String responseStatus;
+                String requestStatus;
+                String teacherComment;
+
+<span class="nc bnc" id="L441" title="All 2 branches missed.">                if (choice.priority == 1) {</span>
+
+<span class="nc" id="L443">                    responseStatus =</span>
+<span class="nc bnc" id="L444" title="All 2 branches missed.">                            hasSibling</span>
+<span class="nc" id="L445">                                    ? &quot;SIBLING_AUTO_CONFIRMED&quot;</span>
+<span class="nc" id="L446">                                    : &quot;AUTO_CONFIRMED&quot;;</span>
+
+<span class="nc" id="L448">                    requestStatus = &quot;CONFIRMED&quot;;</span>
+
+<span class="nc" id="L450">                    teacherComment =</span>
+<span class="nc" id="L451">                            &quot;第1希望のため自動確定&quot;;</span>
+
+<span class="nc" id="L453">                } else {</span>
+
+<span class="nc" id="L455">                    responseStatus =</span>
+<span class="nc" id="L456">                            &quot;WAITING_PARENT&quot;;</span>
+
+<span class="nc" id="L458">                    requestStatus =</span>
+<span class="nc" id="L459">                            &quot;WAITING_PARENT&quot;;</span>
+
+<span class="nc" id="L461">                    teacherComment =</span>
+<span class="nc" id="L462">                            &quot;第&quot;</span>
+<span class="nc" id="L463">                                    + choice.priority</span>
+<span class="nc" id="L464">                                    + &quot;希望のため&quot;</span>
+<span class="nc" id="L465">                                    + &quot;保護者確認待ち&quot;;</span>
+                }
+
+<span class="nc" id="L468">                Query insertPlan =</span>
+<span class="nc" id="L469">                        em.createNativeQuery(</span>
+<span class="nc" id="L470">                                &quot;INSERT INTO final_plans &quot;</span>
+                                        + &quot;(parent_request_id, &quot;
+                                        + &quot;selected_option_id, &quot;
+                                        + &quot;teacher_comment, &quot;
+                                        + &quot;response_status) &quot;
+                                        + &quot;VALUES &quot;
+                                        + &quot;(:requestId, &quot;
+                                        + &quot;:optionId, &quot;
+                                        + &quot;:teacherComment, &quot;
+                                        + &quot;:responseStatus)&quot;
+                        );
+
+<span class="nc" id="L482">                insertPlan.setParameter(</span>
+<span class="nc" id="L483">                        &quot;requestId&quot;,</span>
+<span class="nc" id="L484">                        requestId</span>
+                );
+
+<span class="nc" id="L487">                insertPlan.setParameter(</span>
+<span class="nc" id="L488">                        &quot;optionId&quot;,</span>
+<span class="nc" id="L489">                        choice.optionId</span>
+                );
+
+<span class="nc" id="L492">                insertPlan.setParameter(</span>
+<span class="nc" id="L493">                        &quot;teacherComment&quot;,</span>
+<span class="nc" id="L494">                        teacherComment</span>
+                );
+
+<span class="nc" id="L497">                insertPlan.setParameter(</span>
+<span class="nc" id="L498">                        &quot;responseStatus&quot;,</span>
+<span class="nc" id="L499">                        responseStatus</span>
+                );
+
+<span class="nc" id="L502">                insertPlan.executeUpdate();</span>
+
+<span class="nc" id="L504">                Query updateRequest =</span>
+<span class="nc" id="L505">                        em.createNativeQuery(</span>
+<span class="nc" id="L506">                                &quot;UPDATE parent_requests &quot;</span>
+                                        + &quot;SET request_status &quot;
+                                        + &quot;= :requestStatus &quot;
+                                        + &quot;WHERE id = :requestId&quot;
+                        );
+
+<span class="nc" id="L512">                updateRequest.setParameter(</span>
+<span class="nc" id="L513">                        &quot;requestStatus&quot;,</span>
+<span class="nc" id="L514">                        requestStatus</span>
+                );
+
+<span class="nc" id="L517">                updateRequest.setParameter(</span>
+<span class="nc" id="L518">                        &quot;requestId&quot;,</span>
+<span class="nc" id="L519">                        requestId</span>
+                );
+
+<span class="nc" id="L522">                updateRequest.executeUpdate();</span>
+
+<span class="nc" id="L524">                Query updateOption =</span>
+<span class="nc" id="L525">                        em.createNativeQuery(</span>
+<span class="nc" id="L526">                                &quot;UPDATE reservation_options &quot;</span>
+                                        + &quot;SET available_flag = 0 &quot;
+                                        + &quot;WHERE id = :optionId&quot;
+                        );
+
+<span class="nc" id="L531">                updateOption.setParameter(</span>
+<span class="nc" id="L532">                        &quot;optionId&quot;,</span>
+<span class="nc" id="L533">                        choice.optionId</span>
+                );
+
+<span class="nc" id="L536">                updateOption.executeUpdate();</span>
+
+<span class="nc" id="L538">                count++;</span>
+            }
+
+<span class="nc" id="L541">            em.getTransaction().commit();</span>
+
+<span class="nc" id="L543">            return count;</span>
+
+<span class="nc" id="L545">        } catch (RuntimeException e) {</span>
+
+<span class="nc bnc" id="L547" title="All 2 branches missed.">            if (em != null</span>
+<span class="nc bnc" id="L548" title="All 2 branches missed.">                    &amp;&amp; em.getTransaction().isActive()) {</span>
+
+<span class="nc" id="L550">                em.getTransaction().rollback();</span>
+            }
+
+<span class="nc" id="L553">            throw e;</span>
+
+        } finally {
+
+<span class="nc bnc" id="L557" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L558">                em.close();</span>
+            }
+        }
+    }
+
+    private ChoiceResult findBestAssignableChoice(
+            EntityManager em,
+            Long requestId) {
+
+<span class="nc" id="L567">        Query query =</span>
+<span class="nc" id="L568">                em.createNativeQuery(</span>
+<span class="nc" id="L569">                        &quot;SELECT &quot;</span>
+                                + &quot;pro.reservation_option_id, &quot;
+                                + &quot;pro.priority &quot;
+                                + &quot;FROM &quot;
+                                + &quot;parent_request_options pro &quot;
+                                + &quot;JOIN reservation_options ro &quot;
+                                + &quot;ON &quot;
+                                + &quot;pro.reservation_option_id &quot;
+                                + &quot;= ro.id &quot;
+                                + &quot;WHERE &quot;
+                                + &quot;pro.parent_request_id &quot;
+                                + &quot;= :requestId &quot;
+                                + &quot;AND ro.available_flag = 1 &quot;
+                                + &quot;ORDER BY pro.priority ASC&quot;
+                );
+
+<span class="nc" id="L585">        query.setParameter(</span>
+<span class="nc" id="L586">                &quot;requestId&quot;,</span>
+<span class="nc" id="L587">                requestId</span>
+        );
+
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L591">        List&lt;Object[]&gt; choices =</span>
+<span class="nc" id="L592">                query.getResultList();</span>
+
+<span class="nc bnc" id="L594" title="All 2 branches missed.">        for (Object[] row : choices) {</span>
+
+<span class="nc" id="L596">            Long optionId =</span>
+<span class="nc" id="L597">                    ((Number) row[0])</span>
+<span class="nc" id="L598">                            .longValue();</span>
+
+<span class="nc" id="L600">            int priority =</span>
+<span class="nc" id="L601">                    ((Number) row[1])</span>
+<span class="nc" id="L602">                            .intValue();</span>
+
+<span class="nc" id="L604">            return new ChoiceResult(</span>
+<span class="nc" id="L605">                    optionId,</span>
+<span class="nc" id="L606">                    priority</span>
+            );
+        }
+
+<span class="nc" id="L610">        return null;</span>
+    }
+
+    public boolean publishSchedule() {
+
+<span class="nc bnc" id="L615" title="All 2 branches missed.">        if (countManualRequired() &gt; 0) {</span>
+<span class="nc" id="L616">            return false;</span>
+        }
+
+<span class="nc" id="L619">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L622">            em = JpaUtil.createEntityManager();</span>
+<span class="nc" id="L623">            em.getTransaction().begin();</span>
+
+<span class="nc" id="L625">            Query query =</span>
+<span class="nc" id="L626">                    em.createNativeQuery(</span>
+<span class="nc" id="L627">                            &quot;UPDATE final_plans &quot;</span>
+                                    + &quot;SET response_status &quot;
+                                    + &quot;= 'CONFIRMED' &quot;
+                                    + &quot;WHERE response_status IN &quot;
+                                    + &quot;('AUTO_CONFIRMED', &quot;
+                                    + &quot;'SIBLING_AUTO_CONFIRMED')&quot;
+                    );
+
+<span class="nc" id="L635">            query.executeUpdate();</span>
+
+<span class="nc" id="L637">            em.getTransaction().commit();</span>
+
+<span class="nc" id="L639">            return true;</span>
+
+<span class="nc" id="L641">        } catch (RuntimeException e) {</span>
+
+<span class="nc bnc" id="L643" title="All 2 branches missed.">            if (em != null</span>
+<span class="nc bnc" id="L644" title="All 2 branches missed.">                    &amp;&amp; em.getTransaction().isActive()) {</span>
+
+<span class="nc" id="L646">                em.getTransaction().rollback();</span>
+            }
+
+<span class="nc" id="L649">            throw e;</span>
+
+        } finally {
+
+<span class="nc bnc" id="L653" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L654">                em.close();</span>
+            }
+        }
+    }
+
+    private boolean toBoolean(Object value) {
+
+<span class="pc bpc" id="L661" title="1 of 2 branches missed.">        if (value instanceof Boolean) {</span>
+<span class="fc" id="L662">            return (Boolean) value;</span>
+        }
+
+<span class="nc bnc" id="L665" title="All 2 branches missed.">        if (value instanceof Number) {</span>
+<span class="nc bnc" id="L666" title="All 2 branches missed.">            return ((Number) value)</span>
+<span class="nc" id="L667">                    .intValue() == 1;</span>
+        }
+
+<span class="nc" id="L670">        return false;</span>
+    }
+
+    private static class ChoiceResult {
+
+        private final Long optionId;
+        private final int priority;
+
+<span class="nc" id="L678">        private ChoiceResult(</span>
+                Long optionId,
+                int priority) {
+
+<span class="nc" id="L682">            this.optionId = optionId;</span>
+<span class="nc" id="L683">            this.priority = priority;</span>
+<span class="nc" id="L684">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.model</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.model;
+
+public class User {
+
+    private Long id;
+    private String loginId;
+    private String password;
+    private String role;
+    private String displayName;
+    private String className;
+
+<span class="nc" id="L12">    public User() {</span>
+<span class="nc" id="L13">    }</span>
+
+<span class="fc" id="L15">    public User(Long id, String loginId, String password, String role, String displayName, String className) {</span>
+<span class="fc" id="L16">        this.id = id;</span>
+<span class="fc" id="L17">        this.loginId = loginId;</span>
+<span class="fc" id="L18">        this.password = password;</span>
+<span class="fc" id="L19">        this.role = role;</span>
+<span class="fc" id="L20">        this.displayName = displayName;</span>
+<span class="fc" id="L21">        this.className = className;</span>
+<span class="fc" id="L22">    }</span>
+
+    public Long getId() {
+<span class="nc" id="L25">        return id;</span>
+    }
+
+    public String getLoginId() {
+<span class="fc" id="L29">        return loginId;</span>
+    }
+
+    public String getPassword() {
+<span class="nc" id="L33">        return password;</span>
+    }
+
+    public String getRole() {
+<span class="fc" id="L37">        return role;</span>
+    }
+
+    public String getDisplayName() {
+<span class="nc" id="L41">        return displayName;</span>
+    }
+
+    public String getClassName() {
+<span class="nc" id="L45">        return className;</span>
+    }
+
+    public String getRoleLabel() {
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (&quot;TEACHER&quot;.equals(role)) return &quot;先生&quot;;</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (&quot;PARENT&quot;.equals(role)) return &quot;保護者&quot;;</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (&quot;STUDENT&quot;.equals(role)) return &quot;生徒&quot;;</span>
+<span class="nc" id="L52">        return role;</span>
+    }
+
+    public void setId(Long id) {
+<span class="nc" id="L56">        this.id = id;</span>
+<span class="nc" id="L57">    }</span>
+
+    public void setLoginId(String loginId) {
+<span class="nc" id="L60">        this.loginId = loginId;</span>
+<span class="nc" id="L61">    }</span>
+
+    public void setPassword(String password) {
+<span class="nc" id="L64">        this.password = password;</span>
+<span class="nc" id="L65">    }</span>
+
+    public void setRole(String role) {
+<span class="nc" id="L68">        this.role = role;</span>
+<span class="nc" id="L69">    }</span>
+
+    public void setDisplayName(String displayName) {
+<span class="nc" id="L72">        this.displayName = displayName;</span>
+<span class="nc" id="L73">    }</span>
+
+    public void setClassName(String className) {
+<span class="nc" id="L76">        this.className = className;</span>
+<span class="nc" id="L77">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>UserDao.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</a> &gt; <a href="../../index.html" class="el_group">interview-schedule-system</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">com.example.interviewsystem.dao</a> &gt; <span class="el_source">UserDao.java</span></div><h1>UserDao.java</h1><pre class="source lang-java linenums">package com.example.interviewsystem.dao;
+
+import com.example.interviewsystem.model.ChildInfo;
+import com.example.interviewsystem.model.User;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.List;
+
+<span class="fc" id="L11">public class UserDao {</span>
+
+    public User findByLoginIdAndPassword(String loginId, String password) {
+<span class="fc" id="L14">        EntityManager em = null;</span>
+
+        try {
+<span class="fc" id="L17">            em = JpaUtil.createEntityManager();</span>
+
+<span class="fc" id="L19">            Query query = em.createNativeQuery(</span>
+<span class="fc" id="L20">                    &quot;SELECT id, login_id, password, role, display_name, class_name &quot; +</span>
+                    &quot;FROM users &quot; +
+                    &quot;WHERE login_id = :loginId AND password = :password&quot;
+            );
+
+<span class="fc" id="L25">            query.setParameter(&quot;loginId&quot;, loginId);</span>
+<span class="fc" id="L26">            query.setParameter(&quot;password&quot;, password);</span>
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L29">            List&lt;Object[]&gt; rows = query.getResultList();</span>
+
+<span class="fc bfc" id="L31" title="All 2 branches covered.">            if (rows.isEmpty()) {</span>
+<span class="fc" id="L32">                return null;</span>
+            }
+
+<span class="fc" id="L35">            return convertUser(rows.get(0));</span>
+
+        } finally {
+<span class="pc bpc" id="L38" title="2 of 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="fc" id="L39">                em.close();</span>
+            }
+        }
+    }
+
+    public User findById(Long id) {
+<span class="fc" id="L45">        EntityManager em = null;</span>
+
+        try {
+<span class="fc" id="L48">            em = JpaUtil.createEntityManager();</span>
+
+<span class="fc" id="L50">            Query query = em.createNativeQuery(</span>
+<span class="fc" id="L51">                    &quot;SELECT id, login_id, password, role, display_name, class_name &quot; +</span>
+                    &quot;FROM users WHERE id = :id&quot;
+            );
+
+<span class="fc" id="L55">            query.setParameter(&quot;id&quot;, id);</span>
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L58">            List&lt;Object[]&gt; rows = query.getResultList();</span>
+
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">            if (rows.isEmpty()) {</span>
+<span class="fc" id="L61">                return null;</span>
+            }
+
+<span class="nc" id="L64">            return convertUser(rows.get(0));</span>
+
+        } finally {
+<span class="pc bpc" id="L67" title="2 of 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="fc" id="L68">                em.close();</span>
+            }
+        }
+    }
+
+    public List&lt;ChildInfo&gt; findChildrenByParentId(Long parentUserId) {
+<span class="nc" id="L74">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L77">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L79">            Query query = em.createNativeQuery(</span>
+<span class="nc" id="L80">                    &quot;SELECT c.id, c.login_id, c.display_name, c.class_name, pc.has_sibling_flag, pc.sibling_group &quot; +</span>
+                    &quot;FROM parent_children pc &quot; +
+                    &quot;JOIN users c ON pc.child_user_id = c.id &quot; +
+                    &quot;WHERE pc.parent_user_id = :parentUserId &quot; +
+                    &quot;ORDER BY c.login_id&quot;
+            );
+
+<span class="nc" id="L87">            query.setParameter(&quot;parentUserId&quot;, parentUserId);</span>
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L90">            List&lt;Object[]&gt; rows = query.getResultList();</span>
+
+<span class="nc" id="L92">            List&lt;ChildInfo&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L94" title="All 2 branches missed.">            for (Object[] row : rows) {</span>
+<span class="nc" id="L95">                result.add(new ChildInfo(</span>
+<span class="nc" id="L96">                        ((Number) row[0]).longValue(),</span>
+<span class="nc" id="L97">                        (String) row[1],</span>
+<span class="nc" id="L98">                        (String) row[2],</span>
+<span class="nc" id="L99">                        (String) row[3],</span>
+<span class="nc" id="L100">                        toBoolean(row[4]),</span>
+<span class="nc" id="L101">                        (String) row[5]</span>
+                ));
+            }
+
+<span class="nc" id="L105">            return result;</span>
+
+        } finally {
+<span class="nc bnc" id="L108" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L109">                em.close();</span>
+            }
+        }
+    }
+
+    public User findParentByChildId(Long childUserId) {
+<span class="nc" id="L115">        EntityManager em = null;</span>
+
+        try {
+<span class="nc" id="L118">            em = JpaUtil.createEntityManager();</span>
+
+<span class="nc" id="L120">            Query query = em.createNativeQuery(</span>
+<span class="nc" id="L121">                    &quot;SELECT p.id, p.login_id, p.password, p.role, p.display_name, p.class_name &quot; +</span>
+                    &quot;FROM parent_children pc &quot; +
+                    &quot;JOIN users p ON pc.parent_user_id = p.id &quot; +
+                    &quot;WHERE pc.child_user_id = :childUserId&quot;
+            );
+
+<span class="nc" id="L127">            query.setParameter(&quot;childUserId&quot;, childUserId);</span>
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L130">            List&lt;Object[]&gt; rows = query.getResultList();</span>
+
+<span class="nc bnc" id="L132" title="All 2 branches missed.">            if (rows.isEmpty()) {</span>
+<span class="nc" id="L133">                return null;</span>
+            }
+
+<span class="nc" id="L136">            return convertUser(rows.get(0));</span>
+
+        } finally {
+<span class="nc bnc" id="L139" title="All 4 branches missed.">            if (em != null &amp;&amp; em.isOpen()) {</span>
+<span class="nc" id="L140">                em.close();</span>
+            }
+        }
+    }
+
+    private User convertUser(Object[] row) {
+<span class="fc" id="L146">        return new User(</span>
+<span class="fc" id="L147">                ((Number) row[0]).longValue(),</span>
+<span class="fc" id="L148">                (String) row[1],</span>
+<span class="fc" id="L149">                (String) row[2],</span>
+<span class="fc" id="L150">                (String) row[3],</span>
+<span class="fc" id="L151">                (String) row[4],</span>
+<span class="fc" id="L152">                (String) row[5]</span>
+        );
+    }
+
+    private boolean toBoolean(Object value) {
+<span class="nc bnc" id="L157" title="All 2 branches missed.">        if (value instanceof Boolean) {</span>
+<span class="nc" id="L158">            return (Boolean) value;</span>
+        }
+
+<span class="nc bnc" id="L161" title="All 2 branches missed.">        if (value instanceof Number) {</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">            return ((Number) value).intValue() == 1;</span>
+        }
+
+<span class="nc" id="L165">        return false;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span>com.example.interviewsystem.dao (2026年10月5日 下午4:36:45)</div></body></html>
